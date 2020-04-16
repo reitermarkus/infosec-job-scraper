@@ -19,10 +19,20 @@ jobs:
         env:
           HUB_HOST: hub
           HUB_PORT: 4444
+    env:
+      REMOTE_WEBDRIVER_URL: http://hub:4444/wd/hub
     steps:
       - uses: actions/checkout@v2
-      - name: Scrape
+      - name: Install Dependencies
         run: |
           gem install bundler
           bundle install --jobs 4 --retry 3
-          bundle exec rake REMOTE_WEBDRIVER_URL=http://hub:4444/wd/hub
+      - name: Scrape Indeed
+        run: |
+          bundle exec rake indeed
+      - name: Scrape Monster
+        run: |
+          bundle exec rake monster
+      - name: Scrape StepStone
+        run: |
+          bundle exec rake stepstone
