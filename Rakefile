@@ -14,8 +14,13 @@ def headless?
 end
 
 def driver
-  options = Selenium::WebDriver::Firefox::Options.new(args: [*(headless? ? '--headless' : nil)])
-  driver = Selenium::WebDriver.for(:firefox, options: options)
+  driver = if remote_url = ENV['REMOTE_WEBDRIVER_URL']
+    Selenium::WebDriver.for(:remote, url: remote_url)
+  else
+    options = Selenium::WebDriver::Firefox::Options.new(args: [*(headless? ? '--headless' : nil)])
+    Selenium::WebDriver.for(:firefox, options: options)
+  end
+
   driver.manage.timeouts.implicit_wait = 5
   driver
 end
@@ -176,8 +181,6 @@ def get_jobs(mod)
     file.write JSON.pretty_generate(details)
     puts "Saved #{file}."
   end
-ensure
-  d.quit
 end
 
 task :monster do
