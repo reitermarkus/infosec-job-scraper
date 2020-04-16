@@ -14,16 +14,16 @@ def headless?
 end
 
 def driver
-  @driver ||= if (remote_url = ENV['REMOTE_WEBDRIVER_URL'])
+  driver = if (remote_url = ENV['REMOTE_WEBDRIVER_URL'])
     Selenium::WebDriver.for(:remote, url: remote_url, desired_capabilities: :firefox)
   else
     options = Selenium::WebDriver::Firefox::Options.new(args: [*(headless? ? '--headless' : nil)])
     Selenium::WebDriver.for(:firefox, options: options)
   end
 
-  @driver.manage.timeouts.implicit_wait = 5
-  @driver.manage.window.size = Selenium::WebDriver::Dimension.new(1280, 1024)
-  @driver
+  driver.manage.timeouts.implicit_wait = 5
+  driver.manage.window.size = Selenium::WebDriver::Dimension.new(1280, 1024)
+  driver
 end
 
 # Module for scraping jobs from https://at.indeed.com.
@@ -187,6 +187,8 @@ def get_jobs(driver, mod)
     file.write JSON.pretty_generate(details)
     puts "Saved #{file}."
   end
+ensure
+  driver.quit
 end
 
 task :monster do
