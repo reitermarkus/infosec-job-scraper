@@ -1,0 +1,14 @@
+name: RuboCop
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  style:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: andrewmcodes/rubocop-linter-action@v3
