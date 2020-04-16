@@ -9,6 +9,8 @@ on:
 jobs:
   scraper:
     runs-on: ubuntu-latest
+    container:
+      image: ruby:2.6
     services:
       hub:
         image: selenium/hub:3.141.59
@@ -19,11 +21,7 @@ jobs:
           HUB_PORT: 4444
     steps:
       - uses: actions/checkout@v2
-      - name: Set up Ruby 2.6
-        uses: actions/setup-ruby@v1
-        with:
-          ruby-version: 2.6.x
-      - name: Build and test with Rake
+      - name: Scrape
         run: |
           gem install bundler
           bundle install --jobs 4 --retry 3
