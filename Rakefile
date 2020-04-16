@@ -14,15 +14,15 @@ def headless?
 end
 
 def driver
-  driver = if (remote_url = ENV['REMOTE_WEBDRIVER_URL'])
+  @driver ||= if (remote_url = ENV['REMOTE_WEBDRIVER_URL'])
     Selenium::WebDriver.for(:remote, url: remote_url, desired_capabilities: :firefox)
   else
     options = Selenium::WebDriver::Firefox::Options.new(args: [*(headless? ? '--headless' : nil)])
     Selenium::WebDriver.for(:firefox, options: options)
   end
 
-  driver.manage.timeouts.implicit_wait = 5
-  driver
+  @driver.manage.timeouts.implicit_wait = 5
+  @driver
 end
 
 # Module for scraping jobs from https://at.indeed.com.
@@ -90,6 +90,7 @@ module Monster
 
     find_elements(css: '#SearchResults .card-header .title a[href]')
       .map { |l| l.attribute('href') }
+      .to_set
   end
 
   def get_detail_page(url)
@@ -161,43 +162,37 @@ module StepStone
   end
 end
 
-def get_jobs(mod)
-  d = driver
+def get_jobs(driver, mod)
+  driver.extend(mod)
 
-  begin
-    d.extend(mod)
+  puts "Looking for jobs on #{mod.name} …"
+  jobs = driver.search('information security')
+  puts "Found #{jobs.count} jobs on #{mod.name}."
 
-    puts "Looking for jobs on #{mod.name} …"
-    jobs = d.search('information security')
-    puts "Found #{jobs.count} jobs on #{mod.name}."
+  jobs.each do |url|
+    puts "Fetching “#{url}” …"
 
-    jobs.each do |url|
-      puts "Fetching “#{url}” …"
+    details = driver.get_detail_page(url)
+    details[:url] = url
+    details[:date] = Date.today.iso8601
 
-      details = d.get_detail_page(url)
-      details[:url] = url
-      details[:date] = Date.today.iso8601
-
-      file = DATA_DIR.join("#{mod.name.downcase}-#{Digest::SHA2.hexdigest(url)}.json")
-      file.dirname.mkpath
-      file.write JSON.pretty_generate(details)
-      puts "Saved #{file}."
-    end
-  ensure
-    d.quit
+    file = DATA_DIR.join("#{mod.name.downcase}-#{Digest::SHA2.hexdigest(url)}.json")
+    file.dirname.mkpath
+    file.write JSON.pretty_generate(details)
+    puts "Saved #{file}."
   end
 end
 
 task :monster do
-  get_jobs(Monster)
+  get_jobs(driver, Monster)
 end
 
 task :indeed do
-  get_jobs(Indeed)
+  get_jobs(driver, Indeed)
 end
 
 task :stepstone do
-  get_jobs(StepStone)
+  get_jobs(driver, StepStone)
 end
 
 task default: %i[indeed monster stepstone]
