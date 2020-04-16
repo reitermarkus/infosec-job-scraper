@@ -22,12 +22,8 @@ jobs:
         run: |
           gem install bundler
           bundle install --jobs 4 --retry 3
-      - name: Scrape Indeed
+      - name: Scrape
         run: |
-          bundle exec rake indeed
-      - name: Scrape StepStone
-        run: |
-          bundle exec rake stepstone
-      - name: Scrape Monster
-        run: |
-          bundle exec rake monster
+          bundle exec rake
+        env:
+          REMOTE_WEBDRIVER_URL: http://firefox:4444/wd/hub
