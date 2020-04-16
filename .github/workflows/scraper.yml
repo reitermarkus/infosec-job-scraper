@@ -12,15 +12,10 @@ jobs:
     container:
       image: ruby:2.6
     services:
-      hub:
-        image: selenium/hub:3.141.59
       firefox:
-        image: selenium/node-firefox:3.141.59
-        env:
-          HUB_HOST: hub
-          HUB_PORT: 4444
+        image: selenium/standalone-firefox:3.141.59
     env:
-      REMOTE_WEBDRIVER_URL: http://hub:4444/wd/hub
+      REMOTE_WEBDRIVER_URL: http://firefox:4444/wd/hub
     steps:
       - uses: actions/checkout@v2
       - name: Install Dependencies
