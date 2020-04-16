@@ -1,14 +1,23 @@
 AllCops:
   TargetRubyVersion: 2.6
 
+Layout/EndAlignment:
+  EnforcedStyleAlignWith: variable
+
 Layout/LineLength:
   Max: 120
+
+Layout/SpaceAroundMethodCallOperator:
+  Enabled: true
 
 Metrics/AbcSize:
   Max: 25
 
 Metrics/MethodLength:
   Max: 25
+
+Style/ExponentialNotation:
+  Enabled: true
 
 Style/HashEachMethods:
   Enabled: true

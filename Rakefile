@@ -14,7 +14,7 @@ def headless?
 end
 
 def driver
-  driver = if remote_url = ENV['REMOTE_WEBDRIVER_URL']
+  driver = if (remote_url = ENV['REMOTE_WEBDRIVER_URL'])
     Selenium::WebDriver.for(:remote, url: remote_url, desired_capabilities: :firefox)
   else
     options = Selenium::WebDriver::Firefox::Options.new(args: [*(headless? ? '--headless' : nil)])
