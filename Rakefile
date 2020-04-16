@@ -75,20 +75,13 @@ module Monster
 
     puts 'Looking for “cookie” button …'
     cookie_button = find_element(css: '#cookie-modal a[href="#cookie-modal"]')
-    action.move_to(cookie_button)
-    cookie_button.click
+    execute_script('arguments[0].click();', cookie_button)
 
     loop do
       puts 'Looking for “Load more jobs” button …'
 
       load_more_jobs_button = find_element(id: 'loadMoreJobs')
-      action.move_to(load_more_jobs_button)
-
-      begin
-        load_more_jobs_button.click
-      rescue Selenium::WebDriver::Error::StaleElementReferenceError
-        # Button may disappear because scrolling triggers auto-loading.
-      end
+      execute_script('arguments[0].click();', load_more_jobs_button)
 
       puts 'Loading more jobs …'
     rescue Selenium::WebDriver::Error::NoSuchElementError
