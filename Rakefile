@@ -162,6 +162,8 @@ module StepStone
 end
 
 def get_jobs(mod)
+  puts "Looking for jobs on #{mod.name} …"
+
   d = driver
   d.extend(mod)
 
