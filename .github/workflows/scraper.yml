@@ -30,9 +30,9 @@ jobs:
       - name: Scrape Indeed
         run: |
           bundle exec rake indeed
-      - name: Scrape Monster
-        run: |
-          bundle exec rake monster
       - name: Scrape StepStone
         run: |
           bundle exec rake stepstone
+      - name: Scrape Monster
+        run: |
+          bundle exec rake monster
