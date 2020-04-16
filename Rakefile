@@ -75,12 +75,14 @@ module Monster
 
     puts 'Looking for “cookie” button …'
     cookie_button = find_element(css: '#cookie-modal a[href="#cookie-modal"]')
-    execute_script('arguments[0].click();', cookie_button)
+    action.move_to(cookie_button)
+    cookie_button.click
 
     loop do
       puts 'Looking for “Load more jobs” button …'
 
       load_more_jobs_button = find_element(id: 'loadMoreJobs')
+      action.move_to(load_more_jobs_button)
       load_more_jobs_button.click
 
       puts 'Loading more jobs …'
