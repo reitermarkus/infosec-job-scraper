@@ -162,26 +162,29 @@ module StepStone
 end
 
 def get_jobs(mod)
-  puts "Looking for jobs on #{mod.name} …"
-
   d = driver
-  d.extend(mod)
 
-  jobs = d.search('information security')
+  begin
+    d.extend(mod)
 
-  puts "Found #{jobs.count} jobs on #{mod.name}."
+    puts "Looking for jobs on #{mod.name} …"
+    jobs = d.search('information security')
+    puts "Found #{jobs.count} jobs on #{mod.name}."
 
-  jobs.each do |url|
-    puts "Fetching “#{url}” …"
+    jobs.each do |url|
+      puts "Fetching “#{url}” …"
 
-    details = d.get_detail_page(url)
-    details[:url] = url
-    details[:date] = Date.today.iso8601
+      details = d.get_detail_page(url)
+      details[:url] = url
+      details[:date] = Date.today.iso8601
 
-    file = DATA_DIR.join("#{mod.name.downcase}-#{Digest::SHA2.hexdigest(url)}.json")
-    file.dirname.mkpath
-    file.write JSON.pretty_generate(details)
-    puts "Saved #{file}."
+      file = DATA_DIR.join("#{mod.name.downcase}-#{Digest::SHA2.hexdigest(url)}.json")
+      file.dirname.mkpath
+      file.write JSON.pretty_generate(details)
+      puts "Saved #{file}."
+    end
+  ensure
+    d.quit
   end
 end
 
