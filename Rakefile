@@ -22,6 +22,7 @@ def driver
   end
 
   @driver.manage.timeouts.implicit_wait = 5
+  @driver.manage.window.size = Selenium::WebDriver::Dimension.new(1280, 1024)
   @driver
 end
 
