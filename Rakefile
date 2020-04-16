@@ -5,8 +5,6 @@ require 'pathname'
 require 'json'
 require 'digest'
 require 'set'
-require 'scraperwiki'
-require 'mechanize'
 require 'selenium-webdriver'
 
 DATA_DIR = Pathname(__dir__).join('data')
