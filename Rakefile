@@ -83,7 +83,12 @@ module Monster
 
       load_more_jobs_button = find_element(id: 'loadMoreJobs')
       action.move_to(load_more_jobs_button)
-      load_more_jobs_button.click
+
+      begin
+        load_more_jobs_button.click
+      rescue Selenium::WebDriver::Error::StaleElementReferenceError
+        # Button may disappear because scrolling triggers auto-loading.
+      end
 
       puts 'Loading more jobs …'
     rescue Selenium::WebDriver::Error::NoSuchElementError
