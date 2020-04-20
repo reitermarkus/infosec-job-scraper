@@ -27,3 +27,8 @@ jobs:
           bundle exec rake
         env:
           REMOTE_WEBDRIVER_URL: http://firefox:4444/wd/hub
+      - name: Upload Data
+        uses: actions/upload-artifact@v1
+        with:
+          name: data
+          path: data
