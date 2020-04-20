@@ -6,7 +6,6 @@ require 'json'
 require 'digest'
 require 'set'
 require 'selenium-webdriver'
-require 'selenium/webdriver/remote/http/persistent'
 
 DATA_DIR = Pathname(__dir__).join('data')
 
