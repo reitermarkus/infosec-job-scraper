@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require 'logger'
 require 'date'
 require 'pathname'
 require 'json'
@@ -9,9 +10,17 @@ require 'selenium-webdriver'
 
 DATA_DIR = Pathname(__dir__).join('data')
 
+# Helper functions for `ENV`.
 module EnvExtension
   def headless?
     !self['HEADLESS'].nil?
+  end
+end
+
+# Module for making functions available globally.
+module Kernel
+  def log
+    @log ||= Logger.new(STDOUT)
   end
 end
 
@@ -41,9 +50,9 @@ class Driver < Delegator
     @driver = obj
   end
 
-  def reset(t = nil)
+  def reset(duration = nil)
     quit rescue nil
-    sleep t if t
+    sleep duration if duration
     initialize
   end
 end
@@ -56,28 +65,28 @@ def with_retry(*exceptions)
   tries ||= 0
   yield
 rescue *exceptions => e
-  $stderr.puts "#{e.class}: #{e}"
+  log.error "#{e.class}: #{e}"
   driver.reset 2**tries
 
   tries += 1
-  $stderr.puts "Would raise: #{e}" if tries > 3
+  log.error "Would raise: #{e}" if tries > 3
   # raise if tries > 3
 
-  $stderr.puts "Retrying (#{tries}) …"
+  log.error "Retrying (#{tries}) …"
   retry
 end
 
 def get_jobs(mod)
   driver.extend(mod)
 
-  puts "Looking for jobs on #{mod.name} …"
+  log.info "Looking for jobs on #{mod.name} …"
   jobs = with_retry Selenium::WebDriver::Error::NoSuchWindowError, Selenium::WebDriver::Error::UnknownError do
     driver.search('information security')
   end
-  puts "Found #{jobs.count} jobs on #{mod.name}."
+  log.info "Found #{jobs.count} jobs on #{mod.name}."
 
   jobs.each do |url|
-    puts "Fetching “#{url}” …"
+    log.info "Fetching “#{url}” …"
 
     details = with_retry Selenium::WebDriver::Error::NoSuchWindowError, Selenium::WebDriver::Error::UnknownError do
       driver.get_detail_page(url)
@@ -89,7 +98,7 @@ def get_jobs(mod)
     file.dirname.mkpath
     file.write JSON.pretty_generate(details)
 
-    puts "Saved #{file}."
+    log.info "Saved #{file.basename}."
   end
 end
 

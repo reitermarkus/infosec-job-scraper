@@ -8,12 +8,12 @@ module StepStone
     page = 0
     max_page = 1
 
-    puts 'Looking for pages …'
+    log.debug 'Looking for pages …'
 
     while page < max_page
       query_params = URI.encode_www_form(ke: query, fu: 1_000_000, li: 100, of: page * 100)
       url = "https://www.stepstone.at/5/ergebnisliste.html?#{query_params}"
-      puts url
+      log.debug url
       get(url)
 
       jobs += find_elements(css: '#dynamic-resultlist a[href^="/stellenangebote-"]')
@@ -21,7 +21,7 @@ module StepStone
 
       pages = find_element(css: '#dynamic-resultlist [class*="PaginationWrapper"]')
               .text.scan(/\d+/).map(&:to_i)
-      puts "Pages: #{pages}"
+      log.debug "Pages: #{pages}"
 
       page += 1
       max_page = [max_page, *pages].max

@@ -8,18 +8,19 @@ module Indeed
     page = 0
     max_page = 1
 
+    log.debug 'Looking for pages …'
+
     while page <= max_page
       query_params = URI.encode_www_form(q: query, start: page * 10)
       url = "https://at.indeed.com/Jobs?#{query_params}"
-      puts url
+      log.debug url
       get(url)
 
       jobs += find_elements(css: '#resultsBodyContent .jobsearch-SerpJobCard .title a[href]')
               .map { |l| l.attribute('href') }
 
-      puts 'Looking for pages …'
       pages = find_element(css: '#resultsBodyContent .pagination').text.scan(/\d+/).map(&:to_i)
-      puts "Pages: #{pages}"
+      log.debug "Pages: #{pages}"
 
       page += 1
       max_page = [max_page, *pages].max

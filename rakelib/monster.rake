@@ -5,15 +5,15 @@ module Monster
   def search(query)
     query_params = URI.encode_www_form(q: query.gsub(/\s+/, '-'), cy: 'at')
     url = "https://www.monster.at/jobs/suche/?#{query_params}"
+    log.debug url
     get(url)
 
-    puts 'Looking for “cookie” button …'
+    log.debug 'Looking for “cookie” button …'
     cookie_button = find_element(css: '#cookie-modal a[href="#cookie-modal"]')
     execute_script('arguments[0].click();', cookie_button)
 
     loop do
-      puts 'Looking for “Load more jobs” button …'
-
+      log.debug 'Looking for “Load more jobs” button …'
       load_more_jobs_button = find_element(id: 'loadMoreJobs')
 
       begin
@@ -22,9 +22,9 @@ module Monster
         # Button may disappear because scrolling triggers auto-loading.
       end
 
-      puts 'Loading more jobs …'
+      log.debug 'Loading more jobs …'
     rescue Selenium::WebDriver::Error::NoSuchElementError
-      puts 'No more jobs.'
+      log.debug 'No more jobs.'
       break
     end
 

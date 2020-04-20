@@ -11,7 +11,7 @@ Layout/SpaceAroundMethodCallOperator:
   Enabled: true
 
 Metrics/AbcSize:
-  Max: 25
+  Max: 50
 
 Metrics/MethodLength:
   Max: 25
@@ -27,6 +27,9 @@ Style/HashTransformKeys:
 
 Style/HashTransformValues:
   Enabled: true
+
+Style/RescueModifier:
+  Enabled: false
 
 Style/TrailingCommaInHashLiteral:
   EnforcedStyleForMultiline: consistent_comma
