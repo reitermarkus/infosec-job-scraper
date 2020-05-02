@@ -42,7 +42,13 @@ module Monster
     details = keys.zip(values).to_h
 
     details[:title] = find_element(css: '#JobViewHeader .title').text.strip
-    details[:subtitle] = find_element(css: '#JobViewHeader .subtitle').text.strip
+
+    begin
+      details[:subtitle] = find_element(css: '#JobViewHeader .subtitle').text.strip
+    rescue Selenium::WebDriver::Error::NoSuchElementError
+      # Some pages may only contain the main title.
+    end
+
 
     body = begin
              iframe = find_element(id: 'JobPreviewSandbox')
