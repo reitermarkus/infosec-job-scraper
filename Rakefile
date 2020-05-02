@@ -112,6 +112,27 @@ task default: :scrape
 
 task scrape: %i[indeed stepstone monster]
 
+task :deduplicate do
+  paths = Pathname.glob(DATA_DIR.join('*.json'))
+
+  duplicates = paths.map { |path| [path, JSON.parse(File.read(path))] }
+                    .sort_by { |_, json| json['date'] }
+                    .group_by { |_, json| [json['title'], json['content']] }
+                    .values
+                    .select { |v| v.count > 1 }
+
+  duplicates.each do |ds|
+    *delete, keep = ds.map(&:first)
+
+    delete.each do |path|
+      log.info "Deleting '#{path}'."
+      path.delete
+    end
+
+    log.info "Keeping '#{keep}'."
+  end
+end
+
 task :nlp do
   ENV['VIRTUAL_ENV'] = "#{__dir__}/nlp/venv"
   ENV['PATH'] = "#{ENV['VIRTUAL_ENV']}/bin:#{ENV['PATH']}"
