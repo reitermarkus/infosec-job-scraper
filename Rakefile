@@ -108,4 +108,14 @@ def get_jobs(mod)
   end
 end
 
-task default: %i[indeed stepstone monster]
+task default: :scrape
+
+task scrape: %i[indeed stepstone monster]
+
+task :nlp do
+  ENV['VIRTUAL_ENV'] = "#{__dir__}/nlp/venv"
+  ENV['PATH'] = "#{ENV['VIRTUAL_ENV']}/bin:#{ENV['PATH']}"
+  sh 'python3', '-m', 'venv', ENV['VIRTUAL_ENV']
+  sh 'python3', '-m', 'pip', 'install', '-r', 'nlp/requirements.txt'
+  sh 'python3', 'nlp/detect.py'
+end

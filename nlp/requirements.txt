@@ -1,0 +1,7 @@
+click==7.1.2
+html2text==2020.1.16
+joblib==0.14.1
+nltk==3.5
+pycountry==19.8.18
+regex==2020.4.4
+tqdm==4.45.0
