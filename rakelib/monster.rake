@@ -63,6 +63,16 @@ module Monster
     details[:body] = body.attribute('innerHTML')
 
     details
+  rescue Selenium::WebDriver::Error::NoSuchElementError => e
+    begin
+      find_element(id: 'NotAvailAlert')
+      log.error 'Page unavailable.'
+      nil
+    rescue Selenium::WebDriver::Error::NoSuchElementError
+      # Raise the previous exception if the current page
+      # is not the “job unavailable” page.
+      raise e
+    end
   end
 end
 

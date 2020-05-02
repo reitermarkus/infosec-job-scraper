@@ -98,6 +98,9 @@ def get_jobs(mod)
     details = with_retry Selenium::WebDriver::Error::NoSuchWindowError, Selenium::WebDriver::Error::UnknownError do
       driver.get_detail_page(url)
     end
+
+    return if details.nil?
+
     details[:url] = url
     details[:date] = Date.today.iso8601
 
