@@ -86,6 +86,13 @@ def get_jobs(mod)
   log.info "Found #{jobs.count} jobs on #{mod.name}."
 
   jobs.each do |url|
+    file = DATA_DIR.join("#{mod.name.downcase}-#{Digest::SHA2.hexdigest(url)}.json")
+
+    if file.exist?
+      log.info "#{file.basename} already exists."
+      next
+    end
+
     log.info "Fetching “#{url}” …"
 
     details = with_retry Selenium::WebDriver::Error::NoSuchWindowError, Selenium::WebDriver::Error::UnknownError do
@@ -94,7 +101,6 @@ def get_jobs(mod)
     details[:url] = url
     details[:date] = Date.today.iso8601
 
-    file = DATA_DIR.join("#{mod.name.downcase}-#{Digest::SHA2.hexdigest(url)}.json")
     file.dirname.mkpath
     file.write JSON.pretty_generate(details)
 
