@@ -8,10 +8,12 @@ module StepStone
     page = 0
     max_page = 1
 
+    get('https://www.stepstone.at/')
+
     log.debug 'Looking for pages …'
 
     while page < max_page
-      query_params = URI.encode_www_form(ke: query, fu: 1_000_000, li: 100, of: page * 100)
+      query_params = URI.encode_www_form(ke: query, fu: 1_000_000, li: 100, **(page > 0 ? {of: page * 100} : {}))
       url = "https://www.stepstone.at/5/ergebnisliste.html?#{query_params}"
       log.debug url
       get(url)
