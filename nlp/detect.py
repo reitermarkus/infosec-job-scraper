@@ -12,6 +12,10 @@ import pycountry
 from html2text import html2text
 from multiprocessing import Pool, cpu_count
 
+from nltk.tokenize import word_tokenize
+
+from itertools import tee
+
 def detect_language(text):
   tc = nltk.classify.textcat.TextCat()
   guess = tc.guess_language(text)
@@ -20,59 +24,88 @@ def detect_language(text):
 def guess_degree(text):
   degrees = ['HTL', 'FH', 'Universität', 'Master', 'Bachelor', 'Hochschul', 'Pflichtschul', 'Mature', 'Fachschul', 'Fachhochschul', 'HAK', 'HBLA', 'HLW', 'LFS', 'Lehre']
 
-def guess_salary(text):
-  matches = re.findall(r'\s*(?:Euro|EUR|€)\s*(\d+)(?:[,.])?(\d\d\d)(?:[,.](?:-|\d\d))?', text)
-  matches += re.findall(r'\s*(\d+)(?:[,.])(\d\d\d)(?:[,.](?:-|\d\d))?(?:\s*)(?:Euro|EUR|€)', text)
+def pairwise(iterable):
+    "s -> (s0,s1), (s1,s2), (s2, s3), ..."
+    a, b = tee(iterable)
+    next(b, None)
+    return zip(a, b)
 
-  if matches:
-    return max(map(lambda m: float(m[0] + m[1]), matches))
+def guess_salary(words):
+  salaries = []
 
-  return None
+  for (w1, w2) in pairwise(words):
+    if w1 == '€' and isinstance(w2, float):
+      salaries += [w2]
 
-def guess_employment_types(text):
+    if w2 == '€' and isinstance(w1, float):
+      salaries += [w1]
+
+  return salaries
+
+def guess_employment_types(words):
   types = set()
 
-  if re.search(r'(vollzeit|full(-|\s*)time)', text, flags = re.MULTILINE | re.IGNORECASE):
-    types.add('full-time')
+  for word in words:
+    if not isinstance(word, str):
+      continue
 
-  if re.search(r'(teilzeit|part(-|\s*)time)', text, flags = re.MULTILINE | re.IGNORECASE):
-    types.add('part-time')
-
-  hours = re.search(r'(\d+(?:[,.]\d+)?)\s+(?:wochenstunden|hours\s*per\s*week)', text, flags = re.MULTILINE | re.IGNORECASE)
-
-  if hours is not None:
-    hours = float(re.sub(',', '.', hours.group(1)))
-
-    if hours > 20:
+    if re.match(r'(vollzeit|full(-|\s*)time)', word):
       types.add('full-time')
-    else:
+
+    if re.match(r'(teilzeit|part(-|\s*)time)', word):
       types.add('part-time')
+
+  for (hours, word) in pairwise(words):
+    if isinstance(hours, float) and word in ['wochenstunden', 'hours']:
+      if hours > 20:
+        types.add('full-time')
+      else:
+        types.add('part-time')
 
   return types
 
-def clean_text(line):
-  # remove markdown formatting
-  line = re.sub(r'\*\*', r' ', line, flags = re.MULTILINE)
-
-  # remove headings and lists
-  line = re.sub(r'^[\*\#\ ]*(.*)[\*\#\ ]*$', r'\1', line, flags = re.MULTILINE)
+def clean_text(text):
+  # remove hyphens
+  text = re.sub(r'!\[[^\]]*\]\([^\)]*\)', r' ', text, flags = re.MULTILINE)
 
   # remove markdown images
-  line = re.sub(r'!\[[^\]]*\]\([^\)]*\)', r' ', line, flags = re.MULTILINE)
+  text = re.sub(r'!\[[^\]]*\]\([^\)]*\)', r' ', text, flags = re.MULTILINE)
 
   # remove markdown links
-  line = re.sub(r'\[([^\]]*)\]\([^\)]*\)', r'\1', line, flags = re.MULTILINE)
+  text = re.sub(r'\[([^\]]*)\]\([^\)]*\)', r'\1', text, flags = re.MULTILINE)
 
   # add space around EUR/€
-  line = re.sub(r'(EUR|€)', r' \1 ', line, flags = re.MULTILINE)
+  text = re.sub(r'(EUR|€)', r' \1 ', text, flags = re.MULTILINE)
 
-  # remove trailing comma from digits
-  line = re.sub(r'(\d),-', r'\1 ', line, flags = re.MULTILINE)
+  # remove hyphens, underscores and slashes
+  text = re.sub(r'[\-_/]', r' ', text, flags = re.MULTILINE)
 
-  # remove redundant spaces
-  line = re.sub(r'\ +', r' ', line, flags = re.MULTILINE)
+  tokens = word_tokenize(text.lower())
+  words = [clean_word(word) for word in tokens]
+  words = [word for word in words if word]
 
-  return line
+  return words
+
+def clean_word(word):
+  if word in [':', '*', '#', ',', ';', '.', '(', ')', '&', '„', '“', '@', '?', '!', '<', '>', '’', '”', '–']:
+    return None
+
+  if word in ['€', 'eur', 'euro']:
+    return '€'
+
+  match = re.search(r'^\d+(\.\d{3})*(,\d\d?)?$', word)
+  if match:
+    number = re.sub(r'\.', r' ', word)
+    number = re.sub(r',', r'.', number)
+    number = re.sub(r' ', r'', number)
+    return float(number)
+
+  match = re.search(r'^\d+(,\d{3})*(\.\d\d?)?$', word)
+  if match:
+    number = re.sub(r',', r'', word)
+    return float(number)
+
+  return word
 
 def parse_file(path):
   with open(path) as file:
@@ -81,21 +114,22 @@ def parse_file(path):
     title = html2text(json_data['title'])
     body = html2text(json_data['body'])
 
-    cleaned_body = clean_text(body)
+    words = clean_text(body)
 
     # language = detect_language(cleaned_body)
 
     print(path)
     print(title)
-    print(cleaned_body)
 
-    salary = guess_salary(cleaned_body)
+    print(words)
+
+    salary = guess_salary(words)
     print("salary", salary)
     json_data['salary'] = salary
 
-    employment_types = guess_employment_types(cleaned_body)
-    print("employment_types", employment_types)
-    json_data['employment_types'] = employment_types
+    employment_types = guess_employment_types(words)
+    print("employment_type", employment_types)
+    json_data['employment_type'] = employment_types
 
     # print(language)
 
@@ -112,5 +146,6 @@ if __name__ == '__main__':
   pool = Pool(threads)
   result = pool.map(parse_file, data)
 
-  print(len(result))
-  print(sum([1 for v in result if v['salary'] is not None]))
+  print('Total Results:', len(result))
+  print('Salary found for ', sum([1 for v in result if v['salary']]))
+  print('Employment type found for ', sum([1 for v in result if v['employment_type']]))
