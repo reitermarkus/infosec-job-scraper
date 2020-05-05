@@ -99,7 +99,7 @@ def get_jobs(mod)
       driver.get_detail_page(url)
     end
 
-    return if details.nil?
+    next if details.nil?
 
     details[:url] = url
     details[:date] = Date.today.iso8601
