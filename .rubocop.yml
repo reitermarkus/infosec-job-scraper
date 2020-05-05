@@ -14,7 +14,10 @@ Metrics/AbcSize:
   Max: 50
 
 Metrics/MethodLength:
-  Max: 25
+  Max: 50
+
+Style/AsciiComments:
+  AllowedChars: [“, ”]
 
 Style/ExponentialNotation:
   Enabled: true

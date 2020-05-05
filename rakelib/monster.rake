@@ -49,7 +49,6 @@ module Monster
       # Some pages may only contain the main title.
     end
 
-
     body = begin
              iframe = find_element(id: 'JobPreviewSandbox')
 
