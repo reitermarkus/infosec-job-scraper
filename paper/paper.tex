@@ -1,0 +1,62 @@
+\documentclass[runningheads]{llncs}
+
+
+\usepackage{graphicx}
+
+
+\begin{document}
+
+\title{Analysis of Information Security Job Advertisements}
+
+\author{Markus Reiter}
+
+\institute{University of Innsbruck, Austria}
+
+\maketitle
+
+\begin{abstract}
+The abstract should briefly summarize the contents of the paper in
+15--250 words.
+
+\keywords{Information Security \and Scraping \and Job Advertisement}
+
+\end{abstract}
+
+\section{Introduction}
+\label{sec:introduction}
+
+
+\section{Implementation}
+
+\subsection{Evaluation of Scraping Tools}
+\label{sub:evaluation_of_scraping_tools}
+
+The first step towards being able to analyse job advertisements on the internet is being able to properly retrieve them. For this reason, we evaluated various online scraping services.
+
+The first contender we found was \textit{OctoParse}, which provides a desktop application for scraping. Its free tier allows scraping unlimited pages on unlimited computers, with two concurrent scraping jobs. It allows configuring 10 different crawler configurations. There was, however, one major drawback to using \textit{OctoParse}: Its slogan claims “Easy Web Scraping for Anyone” – “Anyone” in this context meaning anyone with a Windows computer, since the desktop application is only supported on Windows. Linux and macOS users would have to run a virtual machine in order to use it, which is definitely not a viable solution for scraping a few websites. So we began looking for alternatives.
+
+One alternative we found was \textit{ScrapingBot}. Unlike \textit{OctoParse}, which provides a desktop application, \textit{ScrapingBot} does not provide an application at all. It is meant to be used similarly to using a proxy server. You can make an HTTP request with the same URL you normally would, and it responds with the contents, which includes any rendered JavaScript. Its free plan includes 100 API calls per month, therefore this also was no viable solution either, since the API calls would probably have been used up before the scraper was even working properly.
+
+The next service we found was \textit{ScrapeStorm}, which is very similar to \textit{OctoParse} in terms of what it provides. It offers a desktop application which works on Linux, macOS as well as Windows. In that regard, it was already looking like a better solution \textit{OctoParse}. The free plan allows 10 different crawler configurations and 1 concurrent local run. It also allows 100 exported rows per day, either into a file or directly into a database. All in all, \textit{ScrapeStorm} seemed like a good fit.
+
+\subsection{Scraping}
+\label{sub:scraping}
+
+After choosing \textit{ScrapeStorm}, we started by setting up the crawlers. The websites we wanted to scrape are \texttt{monster.at}, \texttt{at.indeed.com} and \texttt{stepstone.at}.
+
+For each website, we would have to implement two steps. First, we need to scrape the list of search results, which provides us with a list of links to the detail pages for the job advertisements. The second step is then to scrape the detail page itself.
+
+As a first step, we tried scraping a detail page for a single job advertisement on \texttt{monster.at}. And it was a good thing we did, since it immediately highlighted a major problem. A job detail page on \texttt{monster.at} always includes the actual content of the advertisement inside of a nested \texttt{iframe} element. Using \textit{ScrapeStorm}, we were able to select that \texttt{iframe} element, but we failed to extract any data or text from it. The only thing we got was an empty string. This meant that we had to abandon the idea of using \textit{ScrapeStorm} for our purposes.
+
+With this setback, we now had to find another way to scrape this data. After taking a second look at the \textit{ScrapingBot} homepage, we saw that it is using headless \textit{Chrome} for its backend. We ventured further into this direction and found \textit{Selenium}, which can be used to programmatically use a web browser.
+
+\textit{Selenium} supports all of the major web browsers, the only thing you need it the so called “webdriver” for the corresponding browser. Additionally, \textit{Selenium} can be used with a wide array of programming languages.
+
+\subsection{Natural Language Processing}
+\label{sub:natural_language_processing}
+
+
+\subsection{Graph Generation}
+\label{sub:graph_generation}
+
+\end{document}
