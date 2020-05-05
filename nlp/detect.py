@@ -21,8 +21,32 @@ def detect_language(text):
   guess = tc.guess_language(text)
   return pycountry.languages.get(alpha_3 = guess).alpha_2
 
-def guess_degree(text):
-  degrees = ['HTL', 'FH', 'Universität', 'Master', 'Bachelor', 'Hochschul', 'Pflichtschul', 'Mature', 'Fachschul', 'Fachhochschul', 'HAK', 'HBLA', 'HLW', 'LFS', 'Lehre']
+def guess_degrees(words):
+  degrees = set()
+
+  for word in words:
+    if not isinstance(word, str):
+      continue
+
+    if re.match(r'lehre', word):
+      degrees.add('lehre')
+
+    if re.match(r'pflichtschul', word):
+      degrees.add('pflichtschul')
+
+    if word == 'fh' or re.match(r'fachhochschul', word):
+      degrees.add('fh')
+
+    if word in ['htl', 'hak', 'hbla', 'hlw', 'lfs'] or re.match(r'(matura|fachschul)', word):
+      degrees.add('matura')
+
+    if re.match(r'bachelor', word):
+      degrees.add('bachelor')
+
+    if re.match(r'master', word):
+      degrees.add('master')
+
+  return degrees
 
 def pairwise(iterable):
     "s -> (s0,s1), (s1,s2), (s2, s3), ..."
@@ -127,6 +151,10 @@ def parse_file(path):
     print("salary", salary)
     json_data['salary'] = salary
 
+    degrees = guess_degrees(words)
+    print("degrees", degrees)
+    json_data['degrees'] = degrees
+
     employment_types = guess_employment_types(words)
     print("employment_type", employment_types)
     json_data['employment_type'] = employment_types
@@ -148,4 +176,5 @@ if __name__ == '__main__':
 
   print('Total Results:', len(result))
   print('Salary found for ', sum([1 for v in result if v['salary']]))
+  print('Degrees found for ', sum([1 for v in result if v['degrees']]))
   print('Employment type found for ', sum([1 for v in result if v['employment_type']]))
