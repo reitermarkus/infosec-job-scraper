@@ -136,9 +136,18 @@ task :deduplicate do
   end
 end
 
-task :nlp do
+# https://simplemaps.com/data/at-cities
+file 'nlp/cities.json' do |task|
+  path = task.name
+  sh 'curl', '-sL', 'https://simplemaps.com/static/data/country-cities/at/at.json', '-o', path
+  cities = JSON.parse(File.read(path))
+  File.write path, JSON.pretty_generate(cities.map { |city| [city['city'].downcase, city['admin'].downcase] }.to_h)
+end
+
+task :nlp => 'nlp/cities.json' do
   ENV['VIRTUAL_ENV'] = "#{__dir__}/nlp/venv"
   ENV['PATH'] = "#{ENV['VIRTUAL_ENV']}/bin:#{ENV['PATH']}"
+
   sh 'python3', '-m', 'venv', ENV['VIRTUAL_ENV']
   sh 'python3', '-m', 'pip', 'install', '-r', 'nlp/requirements.txt'
   sh 'python3', 'nlp/detect.py'

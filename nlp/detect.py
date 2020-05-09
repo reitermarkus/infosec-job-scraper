@@ -11,6 +11,7 @@ from nltk.stem import SnowballStemmer
 import pycountry
 from html2text import html2text
 from multiprocessing import Pool, cpu_count
+from functools import lru_cache
 
 from nltk.tokenize import word_tokenize
 
@@ -20,6 +21,27 @@ def detect_language(text):
   tc = nltk.classify.textcat.TextCat()
   guess = tc.guess_language(text)
   return pycountry.languages.get(alpha_3 = guess).alpha_2
+
+def guess_places(words):
+  cities = set()
+  states = set()
+
+  combined_text = ' '.join([word for word in words if isinstance(word, str)])
+
+  for city, state in all_cities():
+    if city in combined_text:
+      cities.add(city)
+
+    if state in combined_text:
+      states.add(state)
+
+  if cities or states:
+    return {
+      'cities': cities,
+      'states': states,
+    }
+
+  return {}
 
 def guess_degrees(words):
   degrees = set()
@@ -147,26 +169,29 @@ def parse_file(path):
 
     print(words)
 
-    salary = guess_salary(words)
-    print("salary", salary)
-    json_data['salary'] = salary
+    data = {}
 
-    degrees = guess_degrees(words)
-    print("degrees", degrees)
-    json_data['degrees'] = degrees
+    data['salary'] = guess_salary(words)
+    data['degrees'] = guess_degrees(words)
+    data['employment_type'] = guess_employment_types(words)
+    data['places'] = guess_places(words)
 
-    employment_types = guess_employment_types(words)
-    print("employment_type", employment_types)
-    json_data['employment_type'] = employment_types
-
-    # print(language)
+    print(data)
 
     print("-" * 100)
 
-    return json_data
+    return data
+
+@lru_cache(maxsize=1)
+def all_cities():
+  nlp_dir = path.dirname(path.realpath(__file__))
+
+  with open(path.join(nlp_dir, 'cities.json')) as file:
+    return json.load(file).items()
 
 if __name__ == '__main__':
-  data_dir = path.join(path.dirname(path.dirname(path.realpath(__file__))), 'data')
+  nlp_dir = path.dirname(path.realpath(__file__))
+  data_dir = path.join(path.dirname(nlp_dir), 'data')
   data = glob(path.join(data_dir, '*.json'))
 
   threads = cpu_count()
@@ -178,3 +203,4 @@ if __name__ == '__main__':
   print('Salary found for ', sum([1 for v in result if v['salary']]))
   print('Degrees found for ', sum([1 for v in result if v['degrees']]))
   print('Employment type found for ', sum([1 for v in result if v['employment_type']]))
+  print('Places found for ', sum([1 for v in result if v['places']]))
