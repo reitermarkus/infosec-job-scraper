@@ -2,7 +2,8 @@
 
 
 \usepackage{graphicx}
-
+\usepackage{listings}
+\usepackage{hyperref}
 
 \begin{document}
 
@@ -14,6 +15,8 @@
 
 \maketitle
 
+\newpage
+
 \begin{abstract}
 The abstract should briefly summarize the contents of the paper in
 15--250 words.
@@ -21,6 +24,8 @@ The abstract should briefly summarize the contents of the paper in
 \keywords{Information Security \and Scraping \and Job Advertisement}
 
 \end{abstract}
+
+\newpage
 
 \section{Introduction}
 \label{sec:introduction}
@@ -39,18 +44,41 @@ One alternative we found was \textit{ScrapingBot}. Unlike \textit{OctoParse}, wh
 
 The next service we found was \textit{ScrapeStorm}, which is very similar to \textit{OctoParse} in terms of what it provides. It offers a desktop application which works on Linux, macOS as well as Windows. In that regard, it was already looking like a better solution \textit{OctoParse}. The free plan allows 10 different crawler configurations and 1 concurrent local run. It also allows 100 exported rows per day, either into a file or directly into a database. All in all, \textit{ScrapeStorm} seemed like a good fit.
 
-\subsection{Scraping}
-\label{sub:scraping}
-
 After choosing \textit{ScrapeStorm}, we started by setting up the crawlers. The websites we wanted to scrape are \texttt{monster.at}, \texttt{at.indeed.com} and \texttt{stepstone.at}.
 
 For each website, we would have to implement two steps. First, we need to scrape the list of search results, which provides us with a list of links to the detail pages for the job advertisements. The second step is then to scrape the detail page itself.
 
 As a first step, we tried scraping a detail page for a single job advertisement on \texttt{monster.at}. And it was a good thing we did, since it immediately highlighted a major problem. A job detail page on \texttt{monster.at} always includes the actual content of the advertisement inside of a nested \texttt{iframe} element. Using \textit{ScrapeStorm}, we were able to select that \texttt{iframe} element, but we failed to extract any data or text from it. The only thing we got was an empty string. This meant that we had to abandon the idea of using \textit{ScrapeStorm} for our purposes.
 
-With this setback, we now had to find another way to scrape this data. After taking a second look at the \textit{ScrapingBot} homepage, we saw that it is using headless \textit{Chrome} for its backend. We ventured further into this direction and found \textit{Selenium}, which can be used to programmatically use a web browser.
+With this setback, we now had to find another way to scrape this data. After taking a second look at the \textit{ScrapingBot} homepage, we saw that it is using headless \textit{Chrome} for its backend. We decided to venture further into this direction and found \textit{Selenium}, which can be used to programmatically use a web browser.
 
-\textit{Selenium} supports all of the major web browsers, the only thing you need it the so called “webdriver” for the corresponding browser. Additionally, \textit{Selenium} can be used with a wide array of programming languages.
+\textit{Selenium} supports all of the major web browsers, the only thing you need is the so called “webdriver” for the corresponding browser. Additionally, \textit{Selenium} can be used with a wide array of programming languages. For our purposes we chose to go with the Ruby version of \textit{Selenium}. Specifically, we chose to use \textit{Rake}, which is similar to \textit{Make}, since it allows us to use the full functionality of \textit{Ruby} and specify tasks for each website. These scraping tasks can then be run with a simple \texttt{rake} command.
+
+Given the setback we encountered on \texttt{monster.at}, the first thing we tried with \textit{Selenium} was to implement a simple task to extract the contents of the nested \texttt{iframe} element in their detail page layout. The first thing we needed to do was to fetch a job page. Next up, we needed to locate the nested \texttt{iframe} element; luckily this element is marked by a unique \texttt{id} field called \texttt{JobPreviewSandbox}. Once we had saved the nested \texttt{iframe} into a variable, we could use the \texttt{switch\_to} function provided by \textit{Selenium} to change to it from the main frame.
+
+\begin{lstlisting}[language=Ruby]
+iframe = find_element(id: 'JobPreviewSandbox')
+switch_to.frame(iframe)
+\end{lstlisting}
+
+Seeing this proof-of-concept task working, we finally settled on using \textit{Selenium} and \textit{Rake} together with the \textit{Firefox} web browser.
+
+\subsection{Scraping}
+\label{sub:scraping}
+
+As already briefly mentioned in \autoref{sub:evaluation_of_scraping_tools}, our goal was to implement scraping for Monster (\href{https://www.monster.at/}{\texttt{monster.at}}), Indeed (\href{https://at.indeed.com/}{\texttt{at.indeed.com}}) and StepStone (\href{https://www.stepstone.at/}{\texttt{stepstone.at}}). In this section we will go into more detail about the exact steps which were necessary to reliably scrape each respective website.
+
+\subsubsection{Monster}
+\label{subsub:monster}
+
+\subsubsection{Indeed}
+\label{subsub:indeed}
+
+\subsubsection{StepStone}
+\label{subsub:stepstone}
+
+
+
 
 \subsection{Natural Language Processing}
 \label{sub:natural_language_processing}
