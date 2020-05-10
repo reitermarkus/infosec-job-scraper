@@ -7,6 +7,7 @@ import json
 import nltk
 nltk.download('crubadan', quiet = True)
 nltk.download('punkt', quiet = True)
+nltk.download('stopwords', quiet = True)
 from nltk.stem import SnowballStemmer
 import pycountry
 from html2text import html2text
@@ -14,8 +15,13 @@ from multiprocessing import Pool, cpu_count
 from functools import lru_cache
 
 from nltk.tokenize import word_tokenize
+from nltk.corpus import stopwords
 
 from itertools import tee
+
+german_stop_words = set(stopwords.words('german'))
+english_stop_words = set(stopwords.words('english'))
+all_stop_words = german_stop_words.union(english_stop_words)
 
 def detect_language(text):
   tc = nltk.classify.textcat.TextCat()
@@ -128,7 +134,7 @@ def clean_text(text):
 
   tokens = word_tokenize(text.lower())
   words = [clean_word(word) for word in tokens]
-  words = [word for word in words if word]
+  words = [word for word in words if word and word not in all_stop_words]
 
   return words
 
@@ -162,8 +168,6 @@ def parse_file(path):
 
     words = clean_text(body)
 
-    # language = detect_language(cleaned_body)
-
     print(path)
     print(title)
 
@@ -171,6 +175,7 @@ def parse_file(path):
 
     data = {}
 
+    # data['language'] = detect_language(cleaned_body)
     data['salary'] = guess_salary(words)
     data['degrees'] = guess_degrees(words)
     data['employment_type'] = guess_employment_types(words)
