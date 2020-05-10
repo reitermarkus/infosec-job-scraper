@@ -40,11 +40,17 @@ module StepStone
   def get_detail_page(url)
     get(url)
 
-    title = find_element(css: '.listing__job-title')
+    title = find_element(css: '.js-listing-header .at-header-company-jobTitle')
+    location = find_element(css: '.js-listing-header .at-listing__list-icons_location')
+    contract_type = find_element(css: '.js-listing-header .at-listing__list-icons_contract-type')
+    work_type = find_element(css: '.js-listing-header .at-listing__list-icons_work-type')
+
     body = find_element(css: '.js-app-ld-ContentBlock')
 
     details = {
       title: title.text.strip,
+      location: location.text.strip,
+      contract_type: "#{work_type.text.strip}, #{contract_type.text.strip}",
       body: body.attribute('innerHTML'),
     }
 

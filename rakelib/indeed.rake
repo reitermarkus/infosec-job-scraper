@@ -33,10 +33,24 @@ module Indeed
     get(url)
 
     title = find_element(css: '.jobsearch-ViewJobLayout-jobDisplay .jobsearch-JobInfoHeader-title')
+    location = begin
+      find_element(css: '.jobsearch-JobMetadataHeader-itemWithIcon .icl-IconFunctional--location + .jobsearch-JobMetadataHeader-iconLabel')
+        .text.strip
+    rescue Selenium::WebDriver::Error::NoSuchElementError
+      nil
+    end
+    contract_type = begin
+      find_element(css: '.jobsearch-JobMetadataHeader-itemWithIcon .icl-IconFunctional--jobs + .jobsearch-JobMetadataHeader-iconLabel')
+        .text.strip
+    rescue Selenium::WebDriver::Error::NoSuchElementError
+      nil
+    end
     body = find_element(id: 'jobDescriptionText')
 
     details = {
       title: title.text.strip,
+      location: location,
+      contract_type: contract_type,
       body: body.attribute('innerHTML'),
     }
 

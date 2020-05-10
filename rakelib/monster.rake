@@ -41,6 +41,9 @@ module Monster
 
     details = keys.zip(values).to_h
 
+    details[:location] = details.delete('Standort')
+    details[:contract_type] = details.delete('Vertragsart')
+
     details[:title] = find_element(css: '#JobViewHeader .title').text.strip
 
     begin
