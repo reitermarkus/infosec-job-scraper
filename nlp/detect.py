@@ -23,6 +23,9 @@ german_stop_words = set(stopwords.words('german'))
 english_stop_words = set(stopwords.words('english'))
 all_stop_words = german_stop_words.union(english_stop_words)
 
+def map_number(word):
+  return float(word) if re.match(r'^\d+(\.\d\d?)?$', word) is not None else word
+
 def detect_language(text):
   tc = nltk.classify.textcat.TextCat()
   guess = tc.guess_language(text)
@@ -32,7 +35,7 @@ def guess_places(words):
   cities = set()
   states = set()
 
-  combined_text = ' '.join([word for word in words if isinstance(word, str)])
+  combined_text = ' '.join([word for word in words])
 
   for city, state in all_cities():
     if city in combined_text:
@@ -53,9 +56,6 @@ def guess_degrees(words):
   degrees = set()
 
   for word in words:
-    if not isinstance(word, str):
-      continue
-
     if re.match(r'lehre', word):
       degrees.add('lehre')
 
@@ -83,14 +83,14 @@ def pairwise(iterable):
     return zip(a, b)
 
 def guess_salary(words):
-  salaries = []
+  salaries = set()
 
-  for (w1, w2) in pairwise(words):
+  for (w1, w2) in pairwise([map_number(word) for word in words]):
     if w1 == '€' and isinstance(w2, float):
-      salaries += [w2]
+      salaries.add(w2)
 
     if w2 == '€' and isinstance(w1, float):
-      salaries += [w1]
+      salaries.add(w1)
 
   return salaries
 
@@ -98,16 +98,13 @@ def guess_employment_types(words):
   types = set()
 
   for word in words:
-    if not isinstance(word, str):
-      continue
-
     if re.match(r'(vollzeit|full(-|\s*)time)', word):
       types.add('full-time')
 
     if re.match(r'(teilzeit|part(-|\s*)time)', word):
       types.add('part-time')
 
-  for (hours, word) in pairwise(words):
+  for (hours, word) in pairwise([map_number(word) for word in words]):
     if isinstance(hours, float) and word in ['wochenstunden', 'hours']:
       if hours > 20:
         types.add('full-time')
@@ -145,17 +142,26 @@ def clean_word(word):
   if word in ['€', 'eur', 'euro']:
     return '€'
 
-  match = re.search(r'^\d+(\.\d{3})*(,\d\d?)?$', word)
-  if match:
-    number = re.sub(r'\.', r' ', word)
-    number = re.sub(r',', r'.', number)
-    number = re.sub(r' ', r'', number)
-    return float(number)
+  # remove trailing dots
+  word = re.sub(r'\.$', '', word)
 
-  match = re.search(r'^\d+(,\d{3})*(\.\d\d?)?$', word)
+  # replace k suffix in numbers
+  word = re.sub(r'^(\d+)k$', '\\1000', word)
+
+  # replace ½ suffix in numbers
+  word = re.sub(r'^(\d+)½$', '\\1.5', word)
+
+  # normalise number format
+  match = re.search(r'^(\d+(?:[\',.]\d{3})*)([\',.]\d\d?)?$', word)
   if match:
-    number = re.sub(r',', r'', word)
-    return float(number)
+    int_part = re.sub(r'[\',.]', r'', match.group(1))
+
+    if match.group(2):
+      dec_part = re.sub(r'[\',.]', r'.', match.group(2))
+    else:
+      dec_part = ''
+
+    return '%s%s' % (int_part, dec_part)
 
   return word
 
