@@ -2,3 +2,6 @@
 data
 nlp/venv
 nlp/cities.json
+.ipynb_checkpoints
+*.pdf
+results

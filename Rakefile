@@ -144,11 +144,18 @@ file 'nlp/cities.json' do |task|
   File.write path, JSON.pretty_generate(cities.map { |city| [city['city'].downcase, city['admin'].downcase] }.to_h)
 end
 
-task :nlp => 'nlp/cities.json' do
+task :python_venv do
   ENV['VIRTUAL_ENV'] = "#{__dir__}/nlp/venv"
   ENV['PATH'] = "#{ENV['VIRTUAL_ENV']}/bin:#{ENV['PATH']}"
 
   sh 'python3', '-m', 'venv', ENV['VIRTUAL_ENV']
   sh 'python3', '-m', 'pip', 'install', '-r', 'nlp/requirements.txt'
+end
+
+task :nlp => [:python_venv, 'nlp/cities.json'] do
   sh 'python3', 'nlp/detect.py'
+end
+
+task :jupyter => :python_venv do
+  exec 'jupyter', 'notebook', '.'
 end
