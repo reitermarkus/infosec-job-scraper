@@ -1,3 +1,5 @@
+import nltk
+import pycountry
 from functools import lru_cache
 from itertools import tee
 import json
@@ -25,7 +27,7 @@ def detect_language(text):
   guess = tc.guess_language(text)
   return pycountry.languages.get(alpha_3 = guess).alpha_2
 
-def guess_places(words):
+def guess_location(words):
   cities = set()
   states = set()
 
@@ -34,17 +36,15 @@ def guess_places(words):
   for city, state in all_cities():
     if city in combined_text:
       cities.add(city)
+      states.add(state)
 
     if state in combined_text:
       states.add(state)
 
-  if cities or states:
-    return {
-      'cities': cities,
-      'states': states,
-    }
-
-  return {}
+  return {
+    'cities': list(cities),
+    'states': list(states),
+  }
 
 def guess_degrees(words):
   degrees = set()
@@ -68,7 +68,7 @@ def guess_degrees(words):
     if re.match(r'master', word):
       degrees.add('master')
 
-  return degrees
+  return list(degrees)
 
 def guess_salary(words):
   salaries = set()
@@ -80,17 +80,27 @@ def guess_salary(words):
     if w2 == '€' and isinstance(w1, float):
       salaries.add(w1)
 
-  return salaries
+  return list(salaries)
 
 def guess_employment_types(words):
   types = set()
 
-  for word in words:
-    if re.match(r'(vollzeit|full(-|\s*)time)', word):
-      types.add('full-time')
+  text = ' '.join(words)
 
-    if re.match(r'(teilzeit|part(-|\s*)time)', word):
-      types.add('part-time')
+  if re.match(r'(vollzeit|full(-|\s*)time)', text):
+    types.add('full-time')
+
+  if re.match(r'(teilzeit|part(-|\s*)time)', text):
+    types.add('part-time')
+
+  if re.match(r'(feste?\s*anstellung|unbefristet)', text):
+    types.add('permanent')
+
+  if re.match(r'(?<!un)befristet', text):
+    types.add('temporary')
+
+  if re.match(r'temporäre?\s*anstellung', text):
+    types.add('temporary')
 
   for (hours, word) in pairwise([map_number(word) for word in words]):
     if isinstance(hours, float) and word in ['wochenstunden', 'hours']:
@@ -99,7 +109,7 @@ def guess_employment_types(words):
       else:
         types.add('part-time')
 
-  return types
+  return list(types)
 
 def guess_experience(words):
   keywords = set()
@@ -116,4 +126,4 @@ def guess_experience(words):
       if stop >= word_count: stop = word_count - 1
       keywords = keywords.union(set(words[start:stop]))
 
-  return keywords
+  return list(keywords)

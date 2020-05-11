@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from os import path
+import os
 import re
 from glob import glob
 import json
@@ -21,6 +21,10 @@ english_stop_words = set(stopwords.words('english'))
 all_stop_words = german_stop_words.union(english_stop_words)
 
 from guess import *
+
+nlp_dir = os.path.dirname(os.path.realpath(__file__))
+data_dir = os.path.join(os.path.dirname(nlp_dir), 'data')
+results_dir = os.path.join(os.path.dirname(nlp_dir), 'results')
 
 def clean_text(text):
   # remove hyphens
@@ -45,7 +49,7 @@ def clean_text(text):
   return words
 
 def clean_word(word):
-  if word in [':', '*', '#', ',', ';', '.', '(', ')', '&', '„', '“', '@', '?', '!', '<', '>', '’', '”', '–']:
+  if word in [':', '*', '#', ',', ';', '.', '(', ')', '&', '„', '“', '@', '?', '!', '<', '>', '’', '”', '–', '…', '•', '‘']:
     return None
 
   if word in ['€', 'eur', 'euro']:
@@ -74,47 +78,86 @@ def clean_word(word):
 
   return word
 
+def map_state(word):
+  states = {
+    'w': 'Wien',
+    's': 'Salzburg',
+    't': 'Tirol',
+    'st': 'Steiermark',
+    'oö': 'Oberösterreich',
+    'nö': 'Niederösterreich',
+    'v': 'Vorarlberg',
+    'k': 'Kärnten',
+    'b': 'Burgenland',
+  }
+
+  return states.get(word, word)
+
 def parse_file(path):
   with open(path) as file:
     json_data = json.load(file)
 
-    title = html2text(json_data['title'])
-    body = html2text(json_data['body'])
+  title = html2text(json_data['title'])
+  body = html2text(json_data['body'])
 
-    words = clean_text(body)
+  words = clean_text(body)
 
-    print(path)
-    print(title)
+  # print(path)
+  # print(title)
 
-    print(words)
+  # print(words)
 
-    data = {}
+  data = {}
 
-    # data['language'] = detect_language(cleaned_body)
-    data['salary'] = guess_salary(words)
-    data['degrees'] = guess_degrees(words)
-    data['employment_type'] = guess_employment_types(words)
-    data['places'] = guess_places(words)
-    data['experience'] = guess_experience(words)
+  # data['language'] = detect_language(' '.join(words))
 
-    print(data)
+  if json_data.get('location', None):
+    data['location'] = guess_location([map_state(word) for word in clean_text(json_data['location'])])
+  else:
+    data['location'] = { 'cities': [], 'states': [] }
 
-    print("-" * 100)
+  if not data['location']['cities'] or not data['location']['states']:
+    location = guess_location(words)
+    data['location']['cities'] = list(set(data['location']['cities'] + location['cities']))
+    data['location']['states'] = list(set(data['location']['states'] + location['states']))
 
-    return data
+  data['salary'] = guess_salary(words)
+  data['degrees'] = guess_degrees(words)
+
+  if json_data.get('contract_type', None):
+    data['employment_type'] = guess_employment_types(clean_text(json_data['contract_type']))
+  else:
+    data['employment_type'] = []
+
+  data['employment_type'] = list(set(data['employment_type'] + guess_employment_types(words)))
+  data['experience'] = guess_experience(words)
+
+  print(data)
+
+  print("-" * 100)
+
+
+
+  return data
 
 if __name__ == '__main__':
-  nlp_dir = path.dirname(path.realpath(__file__))
-  data_dir = path.join(path.dirname(nlp_dir), 'data')
-  data = glob(path.join(data_dir, '*.json'))
+  data = glob(os.path.join(data_dir, '*.json'))
 
   threads = cpu_count()
   threads = 1
   pool = Pool(threads)
   result = pool.map(parse_file, data)
 
+  os.makedirs(results_dir, exist_ok = True)
+  result_path = os.path.join(results_dir, 'all.json')
+
+  with open(result_path, 'w+') as file:
+    json.dump(result, file)
+
+
   print('Total Results:', len(result))
+  # print('Language found for ', sum([1 for v in result if v['language']]))
   print('Salary found for ', sum([1 for v in result if v['salary']]))
   print('Degrees found for ', sum([1 for v in result if v['degrees']]))
   print('Employment type found for ', sum([1 for v in result if v['employment_type']]))
-  print('Places found for ', sum([1 for v in result if v['places']]))
+  print('Places found for ', sum([1 for v in result if v['location']['cities'] or v['location']['states']]))
