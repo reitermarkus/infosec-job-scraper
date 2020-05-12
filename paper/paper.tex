@@ -113,16 +113,15 @@ Pagination on \textit{Indeed} is using a query parameter called \texttt{start} w
 \begin{enumerate}
   \item Initialize empty array.
   \item \label{indeed_workflow_1_search}
-    Perform search request with offset 0.
+    Perform search request with offset \texttt{0}.
   \item Select all result URLs and add them to the array.
-  \item If “next page” button exists, repeat step \ref{indeed_workflow_1_search} with offset + 10.
+  \item If “next page” button exists, repeat step \ref{indeed_workflow_1_search} with offset + \texttt{10}.
 \end{enumerate}
 
 \subsubsection{StepStone}
 \label{subsub:stepstone}
 
-
-
+Implementing the gathering of search results on \textit{StepStone} was largely similar to the workflow used for \textit{Indeed}. The search string can be escaped using the standardised HTML escape codes, furthermore there are some query parameters we make use of: The \texttt{fu} parameter can be used to set the job category. We used \texttt{1000000} for this parameter to specify the “IT \& Communications” category. For faster scraping, we also set the \texttt{li} parameter to \texttt{100} in order to display 100 results per page rather than the default 25. Finally, we use the \texttt{of} parameter to specify the result offset which is then used in the same way as for \texttt{Indeed}. \textit{StepStone} displays the pagination controls at the top of the results page. These include the current as well as the last page number. Using this information we can stop the loop once we reach the last page.
 
 \subsection{Natural Language Processing}
 \label{sub:natural_language_processing}
