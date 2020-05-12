@@ -66,10 +66,42 @@ Seeing this proof-of-concept task working, we finally settled on using \textit{S
 \subsection{Scraping}
 \label{sub:scraping}
 
-As already briefly mentioned in \autoref{sub:evaluation_of_scraping_tools}, our goal was to implement scraping for Monster (\href{https://www.monster.at/}{\texttt{monster.at}}), Indeed (\href{https://at.indeed.com/}{\texttt{at.indeed.com}}) and StepStone (\href{https://www.stepstone.at/}{\texttt{stepstone.at}}). In this section we will go into more detail about the exact steps which were necessary to reliably scrape each respective website.
+As already briefly mentioned in \autoref{sub:evaluation_of_scraping_tools}, our goal was to implement scraping for \textit{Monster} (\href{https://www.monster.at/}{\texttt{monster.at}}), \textit{Indeed} (\href{https://at.indeed.com/}{\texttt{at.indeed.com}}) and \textit{StepStone} (\href{https://www.stepstone.at/}{\texttt{stepstone.at}}). In this section we will go into more detail about the exact steps which were necessary to reliably scrape each respective website.
 
 \subsubsection{Monster}
 \label{subsub:monster}
+
+The first thing we needed to determine for \textit{Monster} was how to perform searches. For this, we simply made a search request manually in a web browser. With the search string “information security” immediately noticed that it was escaped as \texttt{information-security} rather than the standard way to escape HTML, i.e. \texttt{information\%20security}. We needed to consider this when building the query URL.
+
+Next up, we needed to assess how search results are paginated. \textit{Monster} does not use a classic pagination method using query string parameters, but rather uses a single “infinite” list which loads new search results automatically when you scroll to the bottom, or alternatively, click the “load more jobs” button.
+
+With \textit{Selenium}, it was quite easy to extract all URLs leading to detail pages from the result list. Loading more than the first “page” of results was, however, quite convoluted. Simply scrolling down was not a good option, since then there would be no good way of knowing when to stop scrolling. Conveniently, \textit{Selenium} provides function to scroll to a given element, so we simply tried selecting the “load more jobs” button and scrolling to it. This is where we hit another problem. We could scroll the the button, but we were not able to click on it due to a pop-up blocking exactly the lower part of the page where the button is located, which meant we first had to dismiss this pop-up, which further meant introducing another potential point of failure, but for the moment, this solution was working.
+
+In essence, the workflow for parsing URLs was as follows:
+
+\begin{enumerate}
+  \item Perform search request.
+  \item Locate pop-up and dismiss it.
+  \item Locate “load more jobs” button.
+  \item \label{monster_workflow_1_scroll_to_button}
+    Scroll to “load more jobs” button if it exists, otherwise go to step \ref{monster_workflow_1_select_results}.
+  \item \label{monster_workflow_1_click_button}
+    Click “load more jobs” button.
+  \item \label{monster_workflow_1_select_results}
+    Select all result URLs and collect them into an array.
+\end{enumerate}
+
+This workflow seemed to work as expected, however, we later encountered spurious error between step \ref{monster_workflow_1_scroll_to_button} and \ref{monster_workflow_1_click_button}. As mentioned previously, new search results are automatically loaded when you scroll to the bottom of the page. Obviously, scrolling to the “load more jobs” button was triggering that functionality and render the reference to the button invalid, making step \ref{monster_workflow_1_click_button} fail. While searching for a solution, we came upon \textit{Selenium's} \texttt{execute\_script} function, which can be used to directly execute \textit{JavaScript} code in the current browser window. This function enabled us to directly click the “load more jobs” button without scrolling to it, which also made it possible to eliminate the step for locating and dismissing the pop-up.
+
+The final workflow now looked like this:
+
+\begin{enumerate}
+  \item Perform search request.
+  \item Locate “load more jobs” button.
+  \item Click the “load more jobs” button if it exists, otherwise go to \ref{monster_workflow_2_select_results}.
+  \item \label{monster_workflow_2_select_results}
+    Select all result URLs and collect them into an array.
+\end{enumerate}
 
 \subsubsection{Indeed}
 \label{subsub:indeed}
