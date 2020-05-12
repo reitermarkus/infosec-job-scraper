@@ -106,6 +106,18 @@ The final workflow now looked like this:
 \subsubsection{Indeed}
 \label{subsub:indeed}
 
+For \textit{Indeed}, the initial step to implement proper scraping was to implement fetching search results. Luckily, unlike on \textit{Monster}, the search string could be escaped as \texttt{information\%20security} using standardised HTML escape codes.
+
+Pagination on \textit{Indeed} is using a query parameter called \texttt{start} which indicates the offset from the first result. Additionally, the pagination buttons are located at the bottom of the results page. With the “next page” button acting as the stop indicater we can trivially implement the gathering of all detail page URLs as described below:
+
+\begin{enumerate}
+  \item Initialize empty array.
+  \item \label{indeed_workflow_1_search}
+    Perform search request with offset 0.
+  \item Select all result URLs and add them to the array.
+  \item If “next page” button exists, repeat step \ref{indeed_workflow_1_search} with offset + 10.
+\end{enumerate}
+
 \subsubsection{StepStone}
 \label{subsub:stepstone}
 
