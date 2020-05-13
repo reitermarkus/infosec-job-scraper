@@ -31,14 +31,12 @@ def guess_location(words):
   cities = set()
   states = set()
 
-  combined_text = ' '.join([word for word in words])
-
   for city, state in all_cities():
-    if city in combined_text:
+    if city in words:
       cities.add(city)
       states.add(state)
 
-    if state in combined_text:
+    if state in words:
       states.add(state)
 
   return {
