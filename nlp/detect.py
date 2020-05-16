@@ -14,6 +14,7 @@ from html2text import html2text
 from multiprocessing import Pool, cpu_count
 
 from nltk.tokenize import word_tokenize
+from nltk.tokenize import MWETokenizer
 from nltk.corpus import stopwords
 
 german_stop_words = set(stopwords.words('german'))
@@ -26,15 +27,22 @@ nlp_dir = os.path.dirname(os.path.realpath(__file__))
 data_dir = os.path.join(os.path.dirname(nlp_dir), 'data')
 results_dir = os.path.join(os.path.dirname(nlp_dir), 'results')
 
+
+def multi_word_locations():
+  cities = all_cities()
+  locations = [w.split() for w in list(cities.keys()) + list(cities.values())]
+  locations = [tuple(w) for w in locations if len(w) > 1]
+  return locations
+
+multi_word_tokenizer = MWETokenizer(multi_word_locations(), separator=' ')
+
 def clean_text(text):
   # remove hyphens
   text = re.sub(r'!\[[^\]]*\]\([^\)]*\)', r' ', text, flags = re.MULTILINE)
 
-  # remove markdown images
-  text = re.sub(r'!\[[^\]]*\]\([^\)]*\)', r' ', text, flags = re.MULTILINE)
+  text = remove_markdown(text)
 
-  # remove markdown links
-  text = re.sub(r'\[([^\]]*)\]\([^\)]*\)', r'\1', text, flags = re.MULTILINE)
+  text = expand_words(text)
 
   # add space around EUR/€
   text = re.sub(r'(EUR|€)', r' \1 ', text, flags = re.MULTILINE)
@@ -42,7 +50,7 @@ def clean_text(text):
   # remove hyphens, underscores and slashes
   text = re.sub(r'[\-_/]', r' ', text, flags = re.MULTILINE)
 
-  tokens = word_tokenize(text.lower())
+  tokens = multi_word_tokenizer.tokenize(word_tokenize(text.lower()))
   words = [clean_word(word) for word in tokens]
   words = [word for word in words if word and word not in all_stop_words]
 
@@ -136,9 +144,20 @@ def parse_file(path):
 
   print("-" * 100)
 
-
-
   return data
+
+def remove_markdown(text):
+  # remove markdown images
+  text = re.sub(r'!\[[^\]]*\]\([^\)]*\)', r' ', text, flags = re.MULTILINE)
+
+  # remove markdown links
+  text = re.sub(r'\[([^\]]*)\]\([^\)]*\)', r'\1', text, flags = re.MULTILINE)
+
+  return text
+
+def expand_words(text):
+  text = re.sub(r'\bSt\.\s+Pölten\b', 'Sankt Pölten', text, flags = re.MULTILINE)
+  return text
 
 if __name__ == '__main__':
   data = glob(os.path.join(data_dir, '*.json'))

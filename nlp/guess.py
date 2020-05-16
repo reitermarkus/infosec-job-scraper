@@ -11,7 +11,7 @@ def all_cities():
   nlp_dir = path.dirname(path.realpath(__file__))
 
   with open(path.join(nlp_dir, 'cities.json')) as file:
-    return json.load(file).items()
+    return json.load(file)
 
 def pairwise(iterable):
     "s -> (s0,s1), (s1,s2), (s2, s3), ..."
@@ -31,7 +31,7 @@ def guess_location(words):
   cities = set()
   states = set()
 
-  for city, state in all_cities():
+  for city, state in all_cities().items():
     if city in words:
       cities.add(city)
       states.add(state)
@@ -48,19 +48,22 @@ def guess_degrees(words):
   degrees = set()
 
   for word in words:
-    if re.match(r'lehre', word):
+    if re.search(r'lehre', word):
       degrees.add('lehre')
+
+    if re.search(r'ausbildung', word):
+      degrees.add('ausbildung')
 
     if re.match(r'pflichtschul', word):
       degrees.add('pflichtschul')
 
-    if word == 'fh' or re.match(r'fachhochschul', word):
-      degrees.add('fh')
+    if word == 'fh' or re.search(r'hochschul', word):
+      degrees.add('hochschul')
 
     if word in ['htl', 'hak', 'hbla', 'hlw', 'lfs'] or re.match(r'(matura|fachschul)', word):
       degrees.add('matura')
 
-    if re.match(r'bachelor', word):
+    if re.match(r'bachelor', word) or word == 'studium':
       degrees.add('bachelor')
 
     if re.match(r'master', word):
