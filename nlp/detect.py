@@ -30,7 +30,7 @@ results_dir = os.path.join(os.path.dirname(nlp_dir), 'results')
 
 def multi_word_locations():
   cities = all_cities()
-  locations = [w.split() for w in list(cities.keys()) + list(cities.values())]
+  locations = [w.lower().split() for w in list(cities.keys()) + list(cities.values())]
   locations = [tuple(w) for w in locations if len(w) > 1]
   return locations
 

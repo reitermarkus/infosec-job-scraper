@@ -32,11 +32,11 @@ def guess_location(words):
   states = set()
 
   for city, state in all_cities().items():
-    if city in words:
+    if city.lower() in words:
       cities.add(city)
       states.add(state)
 
-    if state in words:
+    if state.lower() in words:
       states.add(state)
 
   return {
