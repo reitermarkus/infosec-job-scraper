@@ -30,11 +30,8 @@ The abstract should briefly summarize the contents of the paper in
 \section{Introduction}
 \label{sec:introduction}
 
-
-\section{Implementation}
-
-\subsection{Evaluation of Scraping Tools}
-\label{sub:evaluation_of_scraping_tools}
+\section{Evaluation of Scraping Tools}
+\label{sec:evaluation_of_scraping_tools}
 
 The first step towards being able to analyse job advertisements on the internet is being able to properly retrieve them. For this reason, we evaluated various online scraping services.
 
@@ -63,10 +60,12 @@ switch_to.frame(iframe)
 
 Seeing this proof-of-concept task working, we finally settled on using \textit{Selenium} and \textit{Rake} together with the \textit{Firefox} web browser.
 
+\section{Implementation}
+
 \subsection{Scraping}
 \label{sub:scraping}
 
-As already briefly mentioned in \autoref{sub:evaluation_of_scraping_tools}, our goal was to implement scraping for \textit{Monster} (\href{https://www.monster.at/}{\texttt{monster.at}}), \textit{Indeed} (\href{https://at.indeed.com/}{\texttt{at.indeed.com}}) and \textit{StepStone} (\href{https://www.stepstone.at/}{\texttt{stepstone.at}}). In this section we will go into more detail about the exact steps which were necessary to reliably scrape each respective website.
+As already briefly mentioned in \autoref{sec:evaluation_of_scraping_tools}, our goal was to implement scraping for \textit{Monster} (\href{https://www.monster.at/}{\texttt{monster.at}}), \textit{Indeed} (\href{https://at.indeed.com/}{\texttt{at.indeed.com}}) and \textit{StepStone} (\href{https://www.stepstone.at/}{\texttt{stepstone.at}}). In this section we will go into more detail about the exact steps which were necessary to reliably scrape each respective website.
 
 \subsubsection{Monster}
 \label{subsub:monster}
@@ -103,6 +102,8 @@ The final workflow now looked like this:
     Select all result URLs and collect them into an array.
 \end{enumerate}
 
+For the second part, the detail page of the job advertisement, we could now loop through all URLs and extract information from each one. On \textit{Monster}, each detail page contains the job title and a subtitle. The subtitle usually contains the location of the open position. Additionally, there is a sidebar which contains further metadata like the contract type, category, carreer level and publication date. The main content of the job advertisement is embedded into a nested \texttt{iframe} element. As mentioned in \autoref{sec:evaluation_of_scraping_tools}, using \textit{Selenium}, we could easily extract the content of this \texttt{iframe} element using the \texttt{switch\_to} function. All other data we could extract equally easily by selecting the corresponding elements using CSS selectors.
+
 \subsubsection{Indeed}
 \label{subsub:indeed}
 
@@ -118,14 +119,20 @@ Pagination on \textit{Indeed} is using a query parameter called \texttt{start} w
   \item If “next page” button exists, repeat step \ref{indeed_workflow_1_search} with offset + \texttt{10}.
 \end{enumerate}
 
+Similarly to \textit{Monster}, the detail pages on \textit{Indeed} contain the title of the job advertisement as well as a metadata section. Care has to be taken when extracting data from this metadata section, since not every detail page contains every entry. Most pages seem to contain the location, but only some contain the contract type of the open position. For this reason, we simply treat all of these as optional and ignore any \texttt{NoSuchElementError} when searching for the respective element. In contrast to \textit{Monster}, the main content of the advertisement is contained as plain text, so no special treatment is necessary in this case.
+
 \subsubsection{StepStone}
 \label{subsub:stepstone}
 
 Implementing the gathering of search results on \textit{StepStone} was largely similar to the workflow used for \textit{Indeed}. The search string can be escaped using the standardised HTML escape codes, furthermore there are some query parameters we make use of: The \texttt{fu} parameter can be used to set the job category. We used \texttt{1000000} for this parameter to specify the “IT \& Communications” category. For faster scraping, we also set the \texttt{li} parameter to \texttt{100} in order to display 100 results per page rather than the default 25. Finally, we use the \texttt{of} parameter to specify the result offset which is then used in the same way as for \texttt{Indeed}. \textit{StepStone} displays the pagination controls at the top of the results page. These include the current as well as the last page number. Using this information we can stop the loop once we reach the last page.
 
+A detail page on \textit{StepStone} contains the job title at the top, followed by a metadata section. The metadata contains the location, type of contract and type of employment (i.e. full-time or part-time). The main content of the job advertisement, similarly to \textit{Indeed}, is a section containing plain text. This makes it trivial to extract all data.
+
+\subsubsection{Detail Page}
+\label{subsub:stepstone}
+
 \subsection{Natural Language Processing}
 \label{sub:natural_language_processing}
-
 
 \subsection{Graph Generation}
 \label{sub:graph_generation}
