@@ -105,6 +105,9 @@ def parse_file(path):
   with open(path) as file:
     json_data = json.load(file)
 
+  if not is_relevant(json_data['title'].lower()):
+    return None
+
   title = html2text(json_data['title'])
   body = html2text(json_data['body'])
 
@@ -141,10 +144,22 @@ def parse_file(path):
   data['experience'] = guess_experience(words)
 
   print(data)
-
   print("-" * 100)
 
   return data
+
+def is_relevant(job_title):
+  information = re.search(r'(information|\bit\b)', job_title) is not None
+  cyber = re.search(r'cyber', job_title) is not None
+  security = re.search(r'(sicherheit|security)', job_title) is not None
+  officer = re.search(r'officer', job_title) is not None
+  specialist = re.search(r'(specialist|spezialist)', job_title) is not None
+  expert = re.search(r'(expert|experte)', job_title) is not None
+  audit = re.search(r'audit', job_title) is not None
+  evaluator = re.search(r'evaluator', job_title) is not None
+  consultant = re.search(r'consultant', job_title) is not None
+  tester = re.search(r'tester', job_title) is not None
+  return (cyber and security) or (information and security) or (security and officer) or (security and specialist) or (security and expert) or (information and audit) or (security and audit) or (security and evaluator) or (security and consultant) or (security and tester)
 
 def remove_markdown(text):
   # remove markdown images
@@ -170,9 +185,10 @@ if __name__ == '__main__':
   os.makedirs(results_dir, exist_ok = True)
   result_path = os.path.join(results_dir, 'all.json')
 
+  result = [r for r in result if r]
+
   with open(result_path, 'w+') as file:
     json.dump(result, file)
-
 
   print('Total Results:', len(result))
   # print('Language found for ', sum([1 for v in result if v['language']]))
