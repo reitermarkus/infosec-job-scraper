@@ -10,7 +10,7 @@ nltk.download('punkt', quiet = True)
 nltk.download('stopwords', quiet = True)
 from nltk.stem import SnowballStemmer
 import pycountry
-from html2text import html2text
+from html2text import HTML2Text
 from multiprocessing import Pool, cpu_count
 
 from nltk.tokenize import word_tokenize
@@ -108,8 +108,13 @@ def parse_file(path):
   if not is_relevant(json_data['title'].lower()):
     return None
 
-  title = html2text(json_data['title'])
-  body = html2text(json_data['body'])
+  html2text = HTML2Text()
+  html2text.ignore_emphasis = True
+  html2text.ignore_links = True
+  html2text.ignore_images = True
+  html2text.ignore_tables = True
+  title = html2text.handle(json_data['title'])
+  body = html2text.handle(json_data['body'])
 
   words = clean_text(body)
 
@@ -159,7 +164,9 @@ def is_relevant(job_title):
   evaluator = re.search(r'evaluator', job_title) is not None
   consultant = re.search(r'consultant', job_title) is not None
   tester = re.search(r'tester', job_title) is not None
-  return (cyber and security) or (information and security) or (security and officer) or (security and specialist) or (security and expert) or (information and audit) or (security and audit) or (security and evaluator) or (security and consultant) or (security and tester)
+  penetration = re.search(r'penetration', job_title) is not None
+  network = re.search(r'(network|netzwerk)', job_title) is not None
+  return (cyber and security) or (information and security) or (security and officer) or (security and specialist) or (security and expert) or (information and audit) or (security and audit) or (security and evaluator) or (security and consultant) or (security and tester) or (penetration and tester) or (network and security)
 
 def remove_markdown(text):
   # remove markdown images
