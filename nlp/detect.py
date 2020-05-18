@@ -60,7 +60,7 @@ def clean_word(word):
   if word in [':', '*', '#', ',', ';', '.', '(', ')', '&', '„', '“', '@', '?', '!', '<', '>', '’', '”', '–', '…', '•', '‘']:
     return None
 
-  if word in ['€', 'eur', 'euro']:
+  if word in ['€', 'eur', 'euro', 'euros']:
     return '€'
 
   # remove trailing dots
