@@ -6,3 +6,7 @@
 *.pdf
 *.synctex.gz
 *.fdb_latexmk
+*.bbl
+*.bcf
+*.blg
+*.run.xml

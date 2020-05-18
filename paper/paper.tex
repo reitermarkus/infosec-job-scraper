@@ -1,9 +1,16 @@
 \documentclass[runningheads]{llncs}
 
+\usepackage{multicol}
 
 \usepackage{graphicx}
 \usepackage{listings}
 \usepackage{hyperref}
+
+\usepackage[
+  style   = numeric,
+  sorting = none,
+]{biblatex}
+\bibliography{paper}
 
 \begin{document}
 
@@ -18,7 +25,7 @@
 \newpage
 
 \begin{abstract}
-The abstract should briefly summarize the contents of the paper in
+The abstract should briefly summarise the contents of the paper in
 15--250 words.
 
 \keywords{Information Security \and Scraping \and Job Advertisement}
@@ -29,6 +36,8 @@ The abstract should briefly summarize the contents of the paper in
 
 \section{Introduction}
 \label{sec:introduction}
+
+Information security management is more and more becoming an essential area of expertise for large and small companies alike.
 
 \section{Evaluation of Scraping Tools}
 \label{sec:evaluation_of_scraping_tools}
@@ -112,7 +121,7 @@ For \textit{Indeed}, the initial step to implement proper scraping was to implem
 Pagination on \textit{Indeed} is using a query parameter called \texttt{start} which indicates the offset from the first result. Additionally, the pagination buttons are located at the bottom of the results page. With the “next page” button acting as the stop indicater we can trivially implement the gathering of all detail page URLs as described below:
 
 \begin{enumerate}
-  \item Initialize empty array.
+  \item Initialise empty array.
   \item \label{indeed_workflow_1_search}
     Perform search request with offset \texttt{0}.
   \item Select all result URLs and add them to the array.
@@ -128,13 +137,86 @@ Implementing the gathering of search results on \textit{StepStone} was largely s
 
 A detail page on \textit{StepStone} contains the job title at the top, followed by a metadata section. The metadata contains the location, type of contract and type of employment (i.e. full-time or part-time). The main content of the job advertisement, similarly to \textit{Indeed}, is a section containing plain text. This makes it trivial to extract all data.
 
-\subsubsection{Detail Page}
-\label{subsub:stepstone}
+\subsubsection{Storage of Scraped Data}
+\label{subsub:storage_of_scraped_data}
+
+Now that we had successfully built the foundation for properly scraping all websites, the last step was to store the scraped data in a format which can be used for further processing. Using a full-fledged database solution, e.g. MySQL or Postgres, was out of the question from the start. Setting up a dedicated database server for what is -- relatively speaking -- a very small amount of data would add too much maintenance overhead. Another aspect to consider is the data layout.
+In database terms, we need to store only a single table of data, which was another reason why we decided against using a database for storing the collected data altogether. This included embedded databases like SQLite which consist of a single file and don't need a dedicated server and client. Ultimately we decided on storing each scraping result in a separate \textit{JSON} file. \textit{JSON} is heavily used for APIs on the web which means that virtually every programming language supports deserialising and serialising data in \textit{JSON} format. To avoid duplicates, we chose to save the files as \texttt{<website>-<id>.json} where \texttt{<website>} is the name of the website, i.e. \texttt{monster}, \texttt{indeed} or \texttt{stepstone}. For the \texttt{id} we calculate the SHA2 checksum of the URL.
+
+For example, the scraped data from the URL
+
+\url{https://at.indeed.com/rc/clk?jk=db6f5459c93e648c&fccid=1272531993b16790&vjs=3}
+
+would be saved as
+
+\texttt{indeed-43da336235334055a25f32a55e7cd343128905d782cd749349659ca3d3d38174.json}
+
+\subsubsection{Removal of Duplicates}
+\label{subsub:removal_of_duplicates}
+
+After a couple of scraping runs, we noticed that there were duplicate results. This happened for all three websites. These duplicates were either completely equal or had only minor differences in their HTML source code. Nevertheless, we needed to introduce a post-processing step after the scraping is finished. We implemented a new \textit{Rake} task called \texttt{deduplicate} which reads all results and sorts them by date. We then convert the results' title and HTML body content to plain text and group the results according to that. Finally, we select all results with more than one source file and remove all but the latest one.
 
 \subsection{Natural Language Processing}
 \label{sub:natural_language_processing}
 
+Once the scraping was done, we could focus on extracting information from the scraped data. For the purpose of data extraction, we chose Python. Like Ruby, Python is an interpreted and dynamically typed language, which makes it a good canditate for natural language processing since we can iterate over code changes very quickly. We chose Python over Ruby due to the vast amount of libraries and frameworks available dedicated to natural language processing, first and foremost the Natural Language Toolkit (NLTK), arguably one of the most widely used platforms for natural language processing. It contains a great variety of tools including classification, tokenization, stemming, tagging, parsing and semantic reasoning. \cite{nltk}
+
+\subsubsection{Data Cleaning}
+\label{subsub:data_cleaning}
+
+The first step when performing any sort of natural language processing should be data cleaning. Specifically, this means removing irrelevant data and bringing the data into a format that can be processed more easily than the raw source. In our the main part that needed to be cleaned was the body text of each result. Each result contains the raw HTML source code of the body text, so the first step was to strip the text from any contained HTML tags. We used the aptly named \texttt{html2text} Python package for this purpose. After further inspection of the results, we noticed that some contained formatting, links and images in Markdown format. We quickly realised that \texttt{html2text} is in fact an HTML to Markdown converter instead of a HTML to plain text converter as we previously deemed from the name. Luckily, \texttt{html2text} provides \texttt{ignore\_emphasis}, \texttt{ignore\_links} and \texttt{ignore\_images} options which can be used to remove the Markdown output for these elements. Once we had the plain text version of the body content, we could subsequently use the \texttt{word\_tokenize} function from the NLTK to split the text into tokens to make further processing easier.
+
+\subsubsection{Extracting the Salary}
+\label{subsub:extracting_the_salary}
+
+The first data point we decided to extract was the salary for the advertised job. Even with only this single data point, there is a lot of variation in how the salary is represented.
+
+\begin{figure}
+\begin{multicols}{3}
+\begin{description}
+  \item 43,595 Euros
+  \item 30k Euros
+  \item 3,100.00 EUR
+  \item EUR 2.800,-
+  \item EUR 50k
+  \item EUR 5700
+  \item EUR 2.600,00
+  \item 70.000 €
+  \item € 4.209,-
+  \item € 3.933,0
+  \item € 55.000,--
+  \item € 65.000,---
+  \item 65,000 €
+  \item €60,000
+  \item €85k
+  \item €3.007,20
+  \item 80.000 Euro
+  \item 60000 €
+\end{description}
+\end{multicols}
+\caption{An incomplete list (extracted from actual data) of number formats used to represent salary.}
+\label{salary_formats}
+\end{figure}
+
+As seen in \autoref{salary_formats}, the diversity of number formats is quite extensive. To explain the steps we took to further clean the input data, we will define the \texttt{clean\_text} step as cleaning the complete text before it is tokenised and the \texttt{clean\_word} step as cleaning a single word after tokenisation.
+
+The first step we took was to add another substep to our existing \texttt{clean\_text} step in which we used the regular expression \texttt{/(EUR|€)/} and replace it with \texttt{' \textbackslash1 '}, i.e. we add an extra space around \texttt{EUR} and \texttt{€} to cover the case where there is not already a space between the currency and the amount. We don't care about introducing extra spacing when there already is a space since the tokenisation will remove it anyways.
+
+Now that we have ensured that the currency is separated from the amound, we can add another substep to \texttt{clean\_word}. Here we introduce a trivial replacement and replace all words which are equal to \texttt{'€'}, \texttt{'eur'}, \texttt{'euro'} or \texttt{'euros'} with \texttt{'€'}.
+
+Next, we add another substep to \texttt{clean\_word} which removes any trailing \texttt{',-'} from numbers. We use a regular expression here to also catch cases with more than a single hyphen. Similarly to the trailing \texttt{',-'}, we replace a trailing \texttt{'k'} with \texttt{'000'}.
+
+The only thing left to do now is to normalise the decimal format (i.e. \texttt{XXXXX,XX}, \texttt{XXXXX.XX}, \texttt{XX.XXX,XX}) \texttt{XX,XXX.XX}, to \texttt{XXXXX.XX} in order to be able parse it in a later step. For the normalisation, we assume that the salary amount has at most two decimal places. We use a regular expression to match 0-2 decimal places with any delimiter symbol and group everything else together. This gives use the integer part with all delimiter symbols and the decimal part as only numbers. Now we simply remove all delimiters from the integer part and combine both parts again with a \texttt{'.'}.
+
+In order to eventually extract the salary, we loop through all cleaned tokens as 2-grams so we can match the currency symbol either before or after the number.
+
+\subsubsection{Extracting the Type of Education}
+\label{subsub:extracting_the_type_of_education}
+
 \subsection{Graph Generation}
 \label{sub:graph_generation}
+
+\newpage
+\printbibliography
 
 \end{document}
