@@ -1,0 +1,24 @@
+name: TeX
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  tex:
+    runs-on: ubuntu-latest
+    container:
+      image: mirisbowring/texlive_ctan_full:2019
+    steps:
+      - uses: actions/checkout@v2
+      - name: Compile Paper
+        run: |
+          cd paper
+          latexmk -cd
+      - name: Upload Paper
+        uses: actions/upload-artifact@v2
+        with:
+          name: paper.pdf
+          path: paper/paper.pdf

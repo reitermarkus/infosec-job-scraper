@@ -28,7 +28,7 @@ jobs:
         env:
           REMOTE_WEBDRIVER_URL: http://firefox:4444/wd/hub
       - name: Upload Data
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v2
         with:
           name: data
           path: data
