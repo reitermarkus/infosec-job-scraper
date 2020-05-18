@@ -152,10 +152,10 @@ task :python_venv do
   sh 'python3', '-m', 'pip', 'install', '-r', 'nlp/requirements.txt'
 end
 
-task :nlp => [:python_venv, 'nlp/cities.json'] do
+task nlp: [:python_venv, 'nlp/cities.json'] do
   sh 'python3', 'nlp/detect.py'
 end
 
-task :jupyter => :python_venv do
+task jupyter: :python_venv do
   exec 'jupyter', 'notebook', '.'
 end
