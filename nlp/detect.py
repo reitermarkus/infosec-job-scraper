@@ -138,7 +138,7 @@ def parse_file(path):
     data['location']['states'] = list(set(data['location']['states'] + location['states']))
 
   data['salary'] = guess_salary(words)
-  data['degrees'] = guess_degrees(words)
+  data['degrees'] = guess_education(words)
 
   if json_data.get('contract_type', None):
     data['employment_type'] = guess_employment_types(clean_text(json_data['contract_type']))

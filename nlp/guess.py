@@ -44,7 +44,7 @@ def guess_location(words):
     'states': list(states),
   }
 
-def guess_degrees(words):
+def guess_education(words):
   degrees = set()
 
   for word in words:

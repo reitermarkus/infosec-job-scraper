@@ -215,6 +215,14 @@ In order to eventually extract the salary, we loop through all cleaned tokens as
 \subsubsection{Extracting the Type of Education}
 \label{subsub:extracting_the_type_of_education}
 
+Another data point we wanted to extract is the level of education required for a given job. We started by looking at some advertisements and then began building some patterns which we could use in our \texttt{guess\_education} function. Some obvious patterns include \texttt{<type>-Abschluss} and \texttt{<type>abschluss} with concrete examples being “HAK-Abschluss” and “Pflichtschulabschluss”. Since the \texttt{guess\_education} function receives the input as individual tokens, compound words including acronyms such as “HTL-Abschluss” would already be split into \texttt{'htl'} and \texttt{'abschluss'}. Given that there are only a handful of acronyms we decided for simplicity's sake to hardcode the most common ones: \texttt{'hak'}, \texttt{'hbla'}, \texttt{'htl'}, \texttt{'hlw'} and \texttt{'lfs'}. We grouped all of these into the \texttt{matura} category. Still, there were some patterns which fall into this category which were not yet recognized, such as “Matura” as a standalone term or “Fachschulabschluss”. For these, we simply check if any word contains these terms.
+
+The next two obvious education types were the bachelor's and master's degree. For these, we again simply checked if any word contains the respective term and categorise them accordingly. Another related education type is an FH (Fachhochschule) degree which can be equivalent to either a bachelor's or master's degree. Here we again took the same approach as for the \texttt{matura} category, since both “FH-Abschluss” and “Fachhochschulabschluss” are commonly used terms.
+
+With these types for higher levels of education covered, we could guess the education level only for less than half of the results. One type we missed previously was the completion of compulsory school. With compulsory school added to the list, we still were only detecting an education type for around half of all results. After inspecting some of the results which were still missing an education type, we found the two types which were still missing: completed apprenticeship (often referred to as “abgeschlossene Ausbildung”) and completed apprenticeship (often referred to as “abgeschlossene Lehre”).
+
+With these two types the extraction rate was now at approximately 90\%. A few more results could be detected by extracting the word \texttt{'studium'}, since some job advertisements refer to a bachelor's degree simply as “abgeschlossenes Studium” (completed studies).
+
 \subsection{Graph Generation}
 \label{sub:graph_generation}
 
