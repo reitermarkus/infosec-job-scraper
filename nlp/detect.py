@@ -27,14 +27,19 @@ nlp_dir = os.path.dirname(os.path.realpath(__file__))
 data_dir = os.path.join(os.path.dirname(nlp_dir), 'data')
 results_dir = os.path.join(os.path.dirname(nlp_dir), 'results')
 
+def multi_words(words):
+  multi_words = [w.lower().split() for w in words]
+  multi_words = [tuple(w) for w in multi_words if len(w) > 1]
+  return multi_words
 
 def multi_word_locations():
   cities = all_cities()
-  locations = [w.lower().split() for w in list(cities.keys()) + list(cities.values())]
-  locations = [tuple(w) for w in locations if len(w) > 1]
-  return locations
+  return multi_words(list(cities.keys()) + list(cities.values()))
 
-multi_word_tokenizer = MWETokenizer(multi_word_locations(), separator=' ')
+def multi_word_certifications():
+  return multi_words(list(CERTIFICATIONS.keys()) + list(CERTIFICATIONS.values()))
+
+multi_word_tokenizer = MWETokenizer(multi_word_locations() + multi_word_certifications(), separator=' ')
 
 def clean_text(text):
   # remove hyphens
@@ -50,6 +55,8 @@ def clean_text(text):
   # remove hyphens, underscores and slashes
   text = re.sub(r'[\-_/]', r' ', text, flags = re.MULTILINE)
 
+  text = re.sub(r'ISO(?:.IEC)?\s*(\d+)', ' ISO/IEC \\1 ', text, flags = re.MULTILINE)
+
   tokens = multi_word_tokenizer.tokenize(word_tokenize(text.lower()))
   words = [clean_word(word) for word in tokens]
   words = [word for word in words if word and word not in all_stop_words]
@@ -57,7 +64,7 @@ def clean_text(text):
   return words
 
 def clean_word(word):
-  if word in [':', '*', '#', ',', ';', '.', '(', ')', '&', '„', '“', '@', '?', '!', '<', '>', '’', '”', '–', '…', '•', '‘']:
+  if word in [':', '*', '#', ',', ';', '.', '(', ')', '&', '„', '“', '@', '?', '!', '<', '>', '’', '”', '–', '…', '•', '‘', '/', ':']:
     return None
 
   if word in ['€', 'eur', 'euro', 'euros']:
@@ -148,6 +155,8 @@ def parse_file(path):
   data['employment_type'] = list(set(data['employment_type'] + guess_employment_types(words)))
   data['experience'] = guess_experience(words)
 
+  data['certifications'] = guess_certifications(words)
+
   print(data)
   print("-" * 100)
 
@@ -203,3 +212,4 @@ if __name__ == '__main__':
   print('Degrees found for ', sum([1 for v in result if v['degrees']]))
   print('Employment type found for ', sum([1 for v in result if v['employment_type']]))
   print('Places found for ', sum([1 for v in result if v['location']['cities'] or v['location']['states']]))
+  print('Certifications found for ', sum([1 for v in result if v['certifications']]))

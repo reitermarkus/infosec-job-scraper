@@ -27,6 +27,34 @@ def detect_language(text):
   guess = tc.guess_language(text)
   return pycountry.languages.get(alpha_3 = guess).alpha_2
 
+
+CERTIFICATIONS = {
+  'CEH': 'Certified Ethical Hacker',
+  'CISA': 'Certified Information Security Auditor',
+  'CISM': 'Certified Information Security Manager',
+  'CISSP': 'Certified Information Systems Security Professional',
+  'CRISC': 'Certified in Risk and Information Systems Control',
+  'ITIL': 'Information Technology Infrastructure Library',
+  'CIA': 'Certified Internal Auditor',
+  'ISO/IEC 27001': 'Information Technology Security Techniques',
+  'HITRUST': 'HITRUST Compliance Certification',
+  'COBIT': 'COBIT Certification',
+  'ISO/IEC 22301': 'Business Continuity Management',
+  'CGEIT': 'Certified in the Governance of Enterprise IT',
+  'GIAC': 'GIAC Cybersecurity Certification'
+}
+
+CERTIFICATIONS_LOWER = [w.lower() for w in CERTIFICATIONS.keys()]
+
+def guess_certifications(words):
+  certifications = set()
+
+  for w in words:
+    if w in CERTIFICATIONS_LOWER:
+      certifications.add(w)
+
+  return list(certifications)
+
 def guess_location(words):
   cities = set()
   states = set()
