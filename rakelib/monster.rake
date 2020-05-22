@@ -59,7 +59,7 @@ module Monster
 
              find_element(tag_name: 'body')
            rescue Selenium::WebDriver::Error::NoSuchElementError
-             find_element(id: 'JobPreview')
+             find_element(css: '#JobPreview #JobBody')
            end
 
     details[:body] = body.attribute('innerHTML')
