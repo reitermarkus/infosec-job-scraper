@@ -44,14 +44,12 @@ CERTIFICATIONS = {
   'GIAC': 'GIAC Cybersecurity Certification'
 }
 
-CERTIFICATIONS_LOWER = [w.lower() for w in CERTIFICATIONS.keys()]
-
 def guess_certifications(words):
   certifications = set()
 
-  for w in words:
-    if w in CERTIFICATIONS_LOWER:
-      certifications.add(w)
+  for c in CERTIFICATIONS.keys():
+    if c.lower() in words:
+      certifications.add(c)
 
   return list(certifications)
 
