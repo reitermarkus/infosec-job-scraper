@@ -77,25 +77,25 @@ def guess_education(words):
 
   for word in words:
     if re.search(r'lehre', word):
-      degrees.add('lehre')
+      degrees.add('Lehre')
 
     if re.search(r'ausbildung', word):
-      degrees.add('ausbildung')
+      degrees.add('Ausbildung')
 
     if re.match(r'pflichtschul', word):
-      degrees.add('pflichtschul')
+      degrees.add('Pflichtschule')
 
     if word == 'fh' or re.search(r'hochschul', word):
-      degrees.add('hochschul')
+      degrees.add('Bachelor')
 
     if word in ['htl', 'hak', 'hbla', 'hlw', 'lfs'] or re.match(r'(matura|fachschul)', word):
-      degrees.add('matura')
+      degrees.add('Matura')
 
-    if re.match(r'bachelor', word) or word == 'studium':
-      degrees.add('bachelor')
+    if re.match(r'bachelor', word) or word in ['studium', 'university', 'universität']:
+      degrees.add('Bachelor')
 
     if re.match(r'master', word):
-      degrees.add('master')
+      degrees.add('Master')
 
   return list(degrees)
 
