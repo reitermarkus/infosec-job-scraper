@@ -24,7 +24,7 @@ def map_number(word):
 
 def detect_language(text):
   tc = nltk.classify.textcat.TextCat()
-  guess = tc.guess_language(text)
+  guess = tc.guess_language(text).strip()
   return pycountry.languages.get(alpha_3 = guess).alpha_2
 
 
