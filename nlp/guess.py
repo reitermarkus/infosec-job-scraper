@@ -41,7 +41,7 @@ CERTIFICATIONS = {
   'COBIT': 'COBIT Certification',
   'ISO/IEC 22301': 'Business Continuity Management',
   'CGEIT': 'Certified in the Governance of Enterprise IT',
-  'GIAC': 'GIAC Cybersecurity Certification'
+  'GIAC': 'GIAC Cybersecurity Certification',
 }
 
 def guess_certifications(words):
