@@ -52,6 +52,13 @@ def clean_text(text):
   # add space around EUR/€
   text = re.sub(r'(EUR|€)', r' \1 ', text, flags = re.MULTILINE)
 
+  text = re.sub(r'Lower\s+Austria', r'Niederösterreich', text, flags = re.MULTILINE | re.IGNORECASE)
+  text = re.sub(r'Upper\s+Austria', r'Oberösterreich', text, flags = re.MULTILINE | re.IGNORECASE)
+  text = re.sub(r'Vienna', r'Wien', text, flags = re.MULTILINE | re.IGNORECASE)
+  text = re.sub(r'Tyrol', r'Tirol', text, flags = re.MULTILINE | re.IGNORECASE)
+  text = re.sub(r'Styria', r'Steiermark', text, flags = re.MULTILINE | re.IGNORECASE)
+  text = re.sub(r'Carinthia', r'Kärnten', text, flags = re.MULTILINE | re.IGNORECASE)
+
   # remove hyphens, underscores and slashes
   text = re.sub(r'[\-_/]', r' ', text, flags = re.MULTILINE)
 
