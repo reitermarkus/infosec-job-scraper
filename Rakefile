@@ -159,3 +159,8 @@ end
 task jupyter: :python_venv do
   exec 'jupyter', 'notebook', '.'
 end
+
+task :tex do
+  cd 'paper'
+  sh 'latexmk', '-cd'
+end

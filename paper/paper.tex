@@ -46,21 +46,21 @@ Information security management is more and more becoming an essential area of e
 
 The first step towards being able to analyse job advertisements on the internet is being able to properly retrieve them. For this reason, we evaluated various online scraping services.
 
-The first contender we found was \textit{OctoParse}, which provides a desktop application for scraping. Its free tier allows scraping unlimited pages on unlimited computers, with two concurrent scraping jobs. It allows configuring 10 different crawler configurations. There was, however, one major drawback to using \textit{OctoParse}: Its slogan claims “Easy Web Scraping for Anyone” – “Anyone” in this context meaning anyone with a Windows computer, since the desktop application is only supported on Windows. Linux and macOS users would have to run a virtual machine in order to use it, which is definitely not a viable solution for scraping a few websites. So we began looking for alternatives.
+The first contender we found was \textit{OctoParse} \cite{octoparse}, which provides a desktop application for scraping. Its free tier allows scraping unlimited pages on unlimited computers, with two concurrent scraping jobs. It allows configuring 10 different crawler configurations. There was, however, one major drawback to using \textit{OctoParse}: Its slogan claims “Easy Web Scraping for Anyone” – “Anyone” in this context meaning anyone with a Windows computer, since the desktop application is only supported on Windows. Linux and macOS users would have to run a virtual machine in order to use it, which is definitely not a viable solution for scraping a few websites. So we began looking for alternatives.
 
-One alternative we found was \textit{ScrapingBot}. Unlike \textit{OctoParse}, which provides a desktop application, \textit{ScrapingBot} does not provide an application at all. It is meant to be used similarly to using a proxy server. You can make an HTTP request with the same URL you normally would, and it responds with the contents, which includes any rendered JavaScript. Its free plan includes 100 API calls per month, therefore this also was no viable solution either, since the API calls would probably have been used up before the scraper was even working properly.
+One alternative we found was \textit{ScrapingBot} \cite{scrapingbot}. Unlike \textit{OctoParse}, which provides a desktop application, \textit{ScrapingBot} does not provide an application at all. It is meant to be used similarly to using a proxy server. You can make an HTTP request with the same URL you normally would, and it responds with the contents, which includes any rendered JavaScript. Its free plan includes 100 API calls per month, therefore this also was no viable solution either, since the API calls would probably have been used up before the scraper was even working properly.
 
-The next service we found was \textit{ScrapeStorm}, which is very similar to \textit{OctoParse} in terms of what it provides. It offers a desktop application which works on Linux, macOS as well as Windows. In that regard, it was already looking like a better solution \textit{OctoParse}. The free plan allows 10 different crawler configurations and 1 concurrent local run. It also allows 100 exported rows per day, either into a file or directly into a database. All in all, \textit{ScrapeStorm} seemed like a good fit.
+The next service we found was \textit{ScrapeStorm} \cite{scrapestorm}, which is very similar to \textit{OctoParse} in terms of what it provides. It offers a desktop application which works on Linux, macOS as well as Windows. In that regard, it was already looking like a better solution \textit{OctoParse}. The free plan allows 10 different crawler configurations and 1 concurrent local run. It also allows 100 exported rows per day, either into a file or directly into a database. All in all, \textit{ScrapeStorm} seemed like a good fit.
 
-After choosing \textit{ScrapeStorm}, we started by setting up the crawlers. The websites we wanted to scrape are \texttt{monster.at}, \texttt{at.indeed.com} and \texttt{stepstone.at}.
+After choosing \textit{ScrapeStorm}, we started by setting up the crawlers. The websites we wanted to scrape are \texttt{monster.at} \cite{monster}, \texttt{at.indeed.com} \cite{indeed} and \texttt{stepstone.at} \cite{stepstone}.
 
 For each website, we would have to implement two steps. First, we need to scrape the list of search results, which provides us with a list of links to the detail pages for the job advertisements. The second step is then to scrape the detail page itself.
 
 As a first step, we tried scraping a detail page for a single job advertisement on \texttt{monster.at}. And it was a good thing we did, since it immediately highlighted a major problem. A job detail page on \texttt{monster.at} always includes the actual content of the advertisement inside of a nested \texttt{iframe} element. Using \textit{ScrapeStorm}, we were able to select that \texttt{iframe} element, but we failed to extract any data or text from it. The only thing we got was an empty string. This meant that we had to abandon the idea of using \textit{ScrapeStorm} for our purposes.
 
-With this setback, we now had to find another way to scrape this data. After taking a second look at the \textit{ScrapingBot} homepage, we saw that it is using headless \textit{Chrome} for its backend. We decided to venture further into this direction and found \textit{Selenium}, which can be used to programmatically use a web browser.
+With this setback, we now had to find another way to scrape this data. After taking a second look at the \textit{ScrapingBot} homepage, we saw that it is using headless \textit{Chrome} for its backend. We decided to venture further into this direction and found \textit{Selenium} \cite{selenium}, which can be used to programmatically use a web browser.
 
-\textit{Selenium} supports all of the major web browsers, the only thing you need is the so called “webdriver” for the corresponding browser. Additionally, \textit{Selenium} can be used with a wide array of programming languages. For our purposes we chose to go with the Ruby version of \textit{Selenium}. Specifically, we chose to use \textit{Rake}, which is similar to \textit{Make}, since it allows us to use the full functionality of \textit{Ruby} and specify tasks for each website. These scraping tasks can then be run with a simple \texttt{rake} command.
+\textit{Selenium} supports all of the major web browsers, the only thing you need is the so called “webdriver” for the corresponding browser. Additionally, \textit{Selenium} can be used with a wide array of programming languages. For our purposes we chose to go with the Ruby version of \textit{Selenium}. Specifically, we chose to use \textit{Rake} \cite{rake}, which is similar to \textit{Make}, since it allows us to use the full functionality of \textit{Ruby} \cite{ruby} and specify tasks for each website. These scraping tasks can then be run with a simple \texttt{rake} command.
 
 Given the setback we encountered on \texttt{monster.at}, the first thing we tried with \textit{Selenium} was to implement a simple task to extract the contents of the nested \texttt{iframe} element in their detail page layout. The first thing we needed to do was to fetch a job page. Next up, we needed to locate the nested \texttt{iframe} element; luckily this element is marked by a unique \texttt{id} field called \texttt{JobPreviewSandbox}. Once we had saved the nested \texttt{iframe} into a variable, we could use the \texttt{switch\_to} function provided by \textit{Selenium} to change to it from the main frame.
 
@@ -81,7 +81,7 @@ As already briefly mentioned in \autoref{sec:evaluation_of_scraping_tools}, our 
 \subsubsection{Monster}
 \label{subsub:monster}
 
-The first thing we needed to determine for \textit{Monster} was how to perform searches. For this, we simply made a search request manually in a web browser. With the search string “information security” immediately noticed that it was escaped as \texttt{information-security} rather than the standard way to escape HTML, i.e. \texttt{information\%20security}. We needed to consider this when building the query URL.
+The first thing we needed to determine for \textit{Monster} \cite{monster} was how to perform searches. For this, we simply made a search request manually in a web browser. With the search string “information security” immediately noticed that it was escaped as \texttt{information-security} rather than the standard way to escape HTML, i.e. \texttt{information\%20security}. We needed to consider this when building the query URL.
 
 Next up, we needed to assess how search results are paginated. \textit{Monster} does not use a classic pagination method using query string parameters, but rather uses a single “infinite” list which loads new search results automatically when you scroll to the bottom, or alternatively, click the “load more jobs” button.
 
@@ -118,7 +118,7 @@ For the second part, the detail page of the job advertisement, we could now loop
 \subsubsection{Indeed}
 \label{subsub:indeed}
 
-For \textit{Indeed}, the initial step to implement proper scraping was to implement fetching search results. Luckily, unlike on \textit{Monster}, the search string could be escaped as \texttt{information\%20security} using standardised HTML escape codes.
+For \textit{Indeed} \cite{indeed}, the initial step to implement proper scraping was to implement fetching search results. Luckily, unlike on \textit{Monster}, the search string could be escaped as \texttt{information\%20security} using standardised HTML escape codes.
 
 Pagination on \textit{Indeed} is using a query parameter called \texttt{start} which indicates the offset from the first result. Additionally, the pagination buttons are located at the bottom of the results page. With the “next page” button acting as the stop indicater we can trivially implement the gathering of all detail page URLs as described below:
 
@@ -135,7 +135,7 @@ Similarly to \textit{Monster}, the detail pages on \textit{Indeed} contain the t
 \subsubsection{StepStone}
 \label{subsub:stepstone}
 
-Implementing the gathering of search results on \textit{StepStone} was largely similar to the workflow used for \textit{Indeed}. The search string can be escaped using the standardised HTML escape codes, furthermore there are some query parameters we make use of: The \texttt{fu} parameter can be used to set the job category. We used \texttt{1000000} for this parameter to specify the “IT \& Communications” category. For faster scraping, we also set the \texttt{li} parameter to \texttt{100} in order to display 100 results per page rather than the default 25. Finally, we use the \texttt{of} parameter to specify the result offset which is then used in the same way as for \texttt{Indeed}. \textit{StepStone} displays the pagination controls at the top of the results page. These include the current as well as the last page number. Using this information we can stop the loop once we reach the last page.
+Implementing the gathering of search results on \textit{StepStone} \cite{stepstone} was largely similar to the workflow used for \textit{Indeed}. The search string can be escaped using the standardised HTML escape codes, furthermore there are some query parameters we make use of: The \texttt{fu} parameter can be used to set the job category. We used \texttt{1000000} for this parameter to specify the “IT \& Communications” category. For faster scraping, we also set the \texttt{li} parameter to \texttt{100} in order to display 100 results per page rather than the default 25. Finally, we use the \texttt{of} parameter to specify the result offset which is then used in the same way as for \texttt{Indeed}. \textit{StepStone} displays the pagination controls at the top of the results page. These include the current as well as the last page number. Using this information we can stop the loop once we reach the last page.
 
 A detail page on \textit{StepStone} contains the job title at the top, followed by a metadata section. The metadata contains the location, type of contract and type of employment (i.e. full-time or part-time). The main content of the job advertisement, similarly to \textit{Indeed}, is a section containing plain text. This makes it trivial to extract all data.
 
@@ -156,7 +156,7 @@ would be saved as
 \subsubsection{Removal of Duplicates}
 \label{subsub:removal_of_duplicates}
 
-After a couple of scraping runs, we noticed that there were duplicate results. This happened for all three websites. These duplicates were either completely equal or had only minor differences in their HTML source code. Nevertheless, we needed to introduce a post-processing step after the scraping is finished. We implemented a new \textit{Rake} task called \texttt{deduplicate} which reads all results and sorts them by date. We then convert the results' title and HTML body content to plain text and group the results according to that. Finally, we select all results with more than one source file and remove all but the latest one.
+After a couple of scraping runs, we noticed that there were duplicate results. This happened for all three websites. These duplicates were either completely equal or had only minor differences in their HTML source code. Nevertheless, we needed to introduce a post-processing step after the scraping is finished. We implemented a new \textit{Rake} task called \texttt{deduplicate} which reads all results and sorts them by date. We then convert the results' title and HTML body content to plain text and group the results according to that. Finally, we can find all duplicates by selecting all results with more than one entry in the corresponding group and remove all but the latest one.
 
 \subsection{Natural Language Processing}
 \label{sub:natural_language_processing}
@@ -174,30 +174,30 @@ The first step when performing any sort of natural language processing should be
 The first data point we decided to extract was the salary for the advertised job. Even with only this single data point, there is a lot of variation in how the salary is represented.
 
 \begin{figure}
-\begin{multicols}{3}
-\begin{description}
-  \item 43,595 Euros
-  \item 30k Euros
-  \item 3,100.00 EUR
-  \item EUR 2.800,-
-  \item EUR 50k
-  \item EUR 5700
-  \item EUR 2.600,00
-  \item 70.000 €
-  \item € 4.209,-
-  \item € 3.933,0
-  \item € 55.000,--
-  \item € 65.000,---
-  \item 65,000 €
-  \item €60,000
-  \item €85k
-  \item €3.007,20
-  \item 80.000 Euro
-  \item 60000 €
-\end{description}
-\end{multicols}
-\caption{An incomplete list (extracted from actual data) of number formats used to represent salary.}
-\label{salary_formats}
+  \begin{multicols}{3}
+    \begin{description}
+      \item 43,595 Euros
+      \item 30k Euros
+      \item 3,100.00 EUR
+      \item EUR 2.800,-
+      \item EUR 50k
+      \item EUR 5700
+      \item EUR 2.600,00
+      \item 70.000 €
+      \item € 4.209,-
+      \item € 3.933,0
+      \item € 55.000,--
+      \item € 65.000,---
+      \item 65,000 €
+      \item €60,000
+      \item €85k
+      \item €3.007,20
+      \item 80.000 Euro
+      \item 60000 €
+    \end{description}
+  \end{multicols}
+  \caption{An incomplete list (extracted from actual data) of number formats used to represent salary.}
+  \label{salary_formats}
 \end{figure}
 
 As seen in \autoref{salary_formats}, the diversity of number formats is quite extensive. To explain the steps we took to further clean the input data, we will define the \texttt{clean\_text} step as cleaning the complete text before it is tokenised and the \texttt{clean\_word} step as cleaning a single word after tokenisation.
@@ -221,7 +221,50 @@ The next two obvious education types were the bachelor's and master's degree. Fo
 
 With these types for higher levels of education covered, we could guess the education level only for less than half of the results. One type we missed previously was the completion of compulsory school. With compulsory school added to the list, we still were only detecting an education type for around half of all results. After inspecting some of the results which were still missing an education type, we found the two types which were still missing: completed apprenticeship (often referred to as “abgeschlossene Ausbildung”) and completed apprenticeship (often referred to as “abgeschlossene Lehre”).
 
-With these two types the extraction rate was now at approximately 90\%. A few more results could be detected by extracting the word \texttt{'studium'}, since some job advertisements refer to a bachelor's degree simply as “abgeschlossenes Studium” (completed studies).
+With these two types the extraction rate was now at approximately 90\%. A few more results could be detected by extracting the words \texttt{'studium'} and \texttt{'universität'}/\texttt{'university'}, since some job advertisements refer to a bachelor's degree simply as “abgeschlossenes Studium” (completed studies) or list “Universität”/“University” as a requirement.
+
+
+\subsubsection{Extracting the Type of Employment}
+\label{subsub:extracting_the_type_of_employment}
+
+We also wanted to know what type of employment a particular job advertisement pertains to, i.e. whether it is a full-time or part-time position and whether the contract is permanent or temporary. Some websites include this information in their metadata section, for others we would have to extract this data from the body text. Apart from the obvious keywords such as \texttt{'full-time'} and \texttt{'part-time'}, we also needed to look for the number of work hours per week in the body text, since some advertisements list the work hours explicitly instead of the more vague distinction between full-time and part-time. To extract this, we used a similar pattern to the one for extracting salaries: We loop through all pairs of words. If the first word is a number and the second word is either \texttt{'wochenstunden'} or \texttt{'hours'}, we parse the number. We assume \texttt{'full-time'} if that number is greater than 20, otherwise we assume \texttt{'part-time'}.
+
+\subsubsection{Extracting the Location}
+\label{subsub:extracting_the_location}
+
+The next data point we needed to extract is the location of the job in question. Fortunately, all of the scraped websites include the location as a separate field in their respective metadata section. This way, we could limit our extraction to just this field. This field required a specialised data cleaning step which expands state acronyms. For example, we needed to replace \texttt{'W'} with \texttt{'Wien'} or \texttt{'Oö'} and \texttt{'OÖ'} with \texttt{'Oberösterreich'}. Additionally, we also replaced the English translations of states and used the German spelling as the canonical version.
+
+Furthermore, we used a database containing all major cities in Austria \cite{austria_cities_database} in order to also catch cases where only the city is specified but the corresponding state is missing. With this database, we can then map the tokenised string to cities and states. In the end, we get a list of all extracted cities and another list of all extracted states. In case we are not able to extract anything from the metadata field, we fall back to running the same extraction function on the whole body text.
+
+\subsubsection{Extracting of Certifications}
+\label{subsub:extracting_of_certifications}
+
+Up next was the extraction of certifications. We found an article listing the most prominent certifcations of the year 2020 \cite{certifications}. Incidentally, the authors of this article also retrieved this list from performing a job board survey. Using the list of certifications mentioned in the article and a manual review of the scraped data, we came up with a list (as can be seen in \autoref{certifications_table}) of all the certifications we wanted to extract.
+
+\begin{table}[h]
+  \caption{List of extracted certifications.}
+  \label{certifications_table}
+
+  \begin{tabular}{|l|l|}
+    \hline
+    \textbf{Certification} & \textbf{Description}                                \\ \hline
+    CEH                    & Certified Ethical Hacker                            \\ \hline
+    CISA                   & Certified Information Security Auditor              \\ \hline
+    CISM                   & Certified Information Security Manager              \\ \hline
+    CISSP                  & Certified Information Systems Security Professional \\ \hline
+    CRISC                  & Certified in Risk and Information Systems Control   \\ \hline
+    ITIL                   & Information Technology Infrastructure Library       \\ \hline
+    CIA                    & Certified Internal Auditor                          \\ \hline
+    ISO/IEC 27001          & Information Technology Security Techniques          \\ \hline
+    HITRUST                & HITRUST Compliance Certification                    \\ \hline
+    COBIT                  & COBIT Certification                                 \\ \hline
+    ISO/IEC 22301          & Business Continuity Management                      \\ \hline
+    CGEIT                  & Certified in the Governance of Enterprise IT        \\ \hline
+    GIAC                   & GIAC Cybersecurity Certification                    \\ \hline
+  \end{tabular}
+\end{table}
+
+In comparison to the other extraction tasks, extracting certifications was straight-forward given this fixed list. There was, however, still one adjustment needed for the data cleaning step with regards to the ISO/IEC certifications since some of them only specified \texttt{'ISO'} while others specified \texttt{'ISO/IEC'}. A few of them were also missing whitespace between the acronym and the number, e.g. \texttt{'ISO27001'}. For this reason, we added another regular expression replacement to the data cleaning step which normalises all of these occurrences to the canonical \texttt{'ISO/IEC \#\#\#\#\#'} form.
 
 \subsection{Graph Generation}
 \label{sub:graph_generation}
