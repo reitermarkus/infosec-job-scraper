@@ -266,8 +266,10 @@ Up next was the extraction of certifications. We found an article listing the mo
 
 In comparison to the other extraction tasks, extracting certifications was straight-forward given this fixed list. There was, however, still one adjustment needed for the data cleaning step with regards to the ISO/IEC certifications since some of them only specified \texttt{'ISO'} while others specified \texttt{'ISO/IEC'}. A few of them were also missing whitespace between the acronym and the number, e.g. \texttt{'ISO27001'}. For this reason, we added another regular expression replacement to the data cleaning step which normalises all of these occurrences to the canonical \texttt{'ISO/IEC \#\#\#\#\#'} form.
 
-\subsection{Graph Generation}
-\label{sub:graph_generation}
+\subsection{Data Visualisation}
+\label{sub:data_visualisation}
+
+Once the data extraction was implemented, naturally we wanted to visualise the collected data in order to make it easier to reason about and draw conclusions. We chose to use \textit{Jupyter} \cite{jupyter} for this purpose. Specifically we used \textit{Jupyter Notebook}, which is an interactive environment in which you can write code and visualise data at the same time. This makes it very useful when experimenting as you can immediately see the results and you can encapsulate code parts into different sections. This saves a lot of time since you do not need to run the whole project on every change but can test the changes for separate sections individually. \textit{Jupyter} is developed in \textit{Python} \cite{python} but also supports a lot of other programming languages. For our purposes we chose to stick with \textit{Python} since there are many great tools available with regards to data analysis and visualisation. To further reorganise the collected data we used the well-known \textit{pandas} \cite{pandas} data analysis and manipulation tool. For data visualisation, we decided to use \textit{Plotly} \cite{plotly}, an open source graphing library. With the power of \textit{Python} and \textit{pandas}, it was relatively straight-forward to convert the collected data into the representation expected by \textit{Plotly} to create graphs. And due to the fact that we were using \textit{Jupyter}, we could immediately see the generated graphs.
 
 \section{Findings}
 \label{sec:findings}
