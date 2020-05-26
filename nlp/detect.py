@@ -139,7 +139,7 @@ def parse_file(path):
 
   data = {}
 
-  # data['language'] = detect_language(' '.join(words))
+  data['language'] = detect_language(body[:512])
 
   if json_data.get('location', None):
     data['location'] = guess_location([map_state(word) for word in clean_text(json_data['location'])])
@@ -201,7 +201,7 @@ if __name__ == '__main__':
   data = glob(os.path.join(data_dir, '*.json'))
 
   threads = cpu_count()
-  threads = 1
+  # threads = 1
   pool = Pool(threads)
   result = pool.map(parse_file, data)
 
