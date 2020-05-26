@@ -4,8 +4,11 @@
 
 \usepackage{multicol}
 
+\usepackage{float}
 \usepackage{graphicx}
+\graphicspath{{assets/}}
 \usepackage{listings}
+\usepackage[hyphens]{url}
 \usepackage{hyperref}
 
 \usepackage[
@@ -16,7 +19,7 @@
 
 \begin{document}
 
-\title{Analysis of Information Security Job Advertisements}
+\title{Analysis of the \\ Information Security Job Landscape \\ in Austria}
 
 \author{Markus Reiter}
 
@@ -27,10 +30,10 @@
 \newpage
 
 \begin{abstract}
-The abstract should briefly summarise the contents of the paper in
-15--250 words.
 
-\keywords{Information Security \and Scraping \and Job Advertisement}
+In this paper we present a survery conducted by scraping and analysing various job search webites in order to get an overview of the current situation and trends regarding the information security job landscape in Austria.
+
+\keywords{Information Security \and Scraping \and Job Advertisements}
 
 \end{abstract}
 
@@ -39,7 +42,7 @@ The abstract should briefly summarise the contents of the paper in
 \section{Introduction}
 \label{sec:introduction}
 
-Information security management is more and more becoming an essential area of expertise for large and small companies alike.
+Information security management is more and more becoming an essential area of expertise for large and small companies alike. In order to get a better understanding of what the information security job landscape looks like in Austria, we conducted a survey of three job search websites popular in Austria: \textit{Monster}~\cite{monster}, \textit{Indeed}~\cite{indeed} and \textit{StepStone}~\cite{stepstone}. Our survey is comprised of three main steps: Firstly, we needed to scrape data each of the three job search websites. As will be explained in more detail in \autoref{sec:evaluation_of_scraping_tools}, we evaluated various scraping tools before we advanced to the actual implementation of the scraping process which will be explained in \autoref{sec:implementation}. The second part of our survey was then to use natural language processing in order to generate a more or less structured version of the information contained in the mostly unstructured text of the job advertisements. Lastly, we analysed and visualised the output data from the natural language processing step in order to fulfill our objective of forming a good overall perspective of the cybersecurity job landscape in Austria. In \autoref{sec:findings} we will present the findings we made during this process.
 
 \section{Evaluation of Scraping Tools}
 \label{sec:evaluation_of_scraping_tools}
@@ -72,6 +75,7 @@ switch_to.frame(iframe)
 Seeing this proof-of-concept task working, we finally settled on using \textit{Selenium} and \textit{Rake} together with the \textit{Firefox} web browser.
 
 \section{Implementation}
+\label{sec:implementation}
 
 \subsection{Scraping}
 \label{sub:scraping}
@@ -174,6 +178,8 @@ The first step when performing any sort of natural language processing should be
 The first data point we decided to extract was the salary for the advertised job. Even with only this single data point, there is a lot of variation in how the salary is represented.
 
 \begin{figure}
+	\centering
+
   \begin{multicols}{3}
     \begin{description}
       \item 43,595 Euros
@@ -239,11 +245,12 @@ Furthermore, we used a database containing all major cities in Austria \cite{aus
 \subsubsection{Extracting of Certifications}
 \label{subsub:extracting_of_certifications}
 
-Up next was the extraction of certifications. We found an article listing the most prominent certifcations of the year 2020 \cite{certifications}. Incidentally, the authors of this article also retrieved this list from performing a job board survey. Using the list of certifications mentioned in the article and a manual review of the scraped data, we came up with a list (as can be seen in \autoref{certifications_table}) of all the certifications we wanted to extract.
+Up next was the extraction of certifications. We found an article listing the most prominent certifcations of the year 2020 \cite{certifications}. Incidentally, the authors of this article also retrieved this list from performing a job board survey. Using the list of certifications mentioned in the article and a manual review of the scraped data, we came up with a list (as can be seen in \autoref{tab:certifications}) of all the certifications we wanted to extract.
 
 \begin{table}[h]
+	\centering
   \caption{List of extracted certifications.}
-  \label{certifications_table}
+  \label{tab:certifications}
 
   \begin{tabular}{|l|l|}
     \hline
@@ -264,18 +271,94 @@ Up next was the extraction of certifications. We found an article listing the mo
   \end{tabular}
 \end{table}
 
-In comparison to the other extraction tasks, extracting certifications was straight-forward given this fixed list. There was, however, still one adjustment needed for the data cleaning step with regards to the ISO/IEC certifications since some of them only specified \texttt{'ISO'} while others specified \texttt{'ISO/IEC'}. A few of them were also missing whitespace between the acronym and the number, e.g. \texttt{'ISO27001'}. For this reason, we added another regular expression replacement to the data cleaning step which normalises all of these occurrences to the canonical \texttt{'ISO/IEC \#\#\#\#\#'} form.
+In comparison to the other extraction tasks, extracting certifications was straight-forward given this fixed list. There was, however, still one adjustment needed for the data cleaning step with regards to the ISO/IEC certifications since some of them only specified \texttt{'ISO'} while others specified \texttt{'ISO/IEC'}. A few of them were also missing whitespace between the acronym and the number, e.g. \texttt{'ISO27001'}. For this reason, we added another regular expression replacement to the data cleaning step which normalises all of these occurrences to the canonical \texttt{'ISO/IEC~\#\#\#\#\#'} form.
 
 \subsection{Data Visualisation}
 \label{sub:data_visualisation}
 
-Once the data extraction was implemented, naturally we wanted to visualise the collected data in order to make it easier to reason about and draw conclusions. We chose to use \textit{Jupyter} \cite{jupyter} for this purpose. Specifically we used \textit{Jupyter Notebook}, which is an interactive environment in which you can write code and visualise data at the same time. This makes it very useful when experimenting as you can immediately see the results and you can encapsulate code parts into different sections. This saves a lot of time since you do not need to run the whole project on every change but can test the changes for separate sections individually. \textit{Jupyter} is developed in \textit{Python} \cite{python} but also supports a lot of other programming languages. For our purposes we chose to stick with \textit{Python} since there are many great tools available with regards to data analysis and visualisation. To further reorganise the collected data we used the well-known \textit{pandas} \cite{pandas} data analysis and manipulation tool. For data visualisation, we decided to use \textit{Plotly} \cite{plotly}, an open source graphing library. With the power of \textit{Python} and \textit{pandas}, it was relatively straight-forward to convert the collected data into the representation expected by \textit{Plotly} to create graphs. And due to the fact that we were using \textit{Jupyter}, we could immediately see the generated graphs.
+Once the data extraction was implemented, naturally we wanted to visualise the collected data in order to make it easier to reason about and draw conclusions. We chose to use \textit{Jupyter} \cite{jupyter} for this purpose. Specifically we used \textit{Jupyter~Notebook}, which is an interactive environment in which you can write code and visualise data at the same time. This makes it very useful when experimenting as you can immediately see the results and you can encapsulate code parts into different sections. This saves a lot of time since you do not need to run the whole project on every change but can test the changes for separate sections individually. \textit{Jupyter} is developed in \textit{Python} \cite{python} but also supports a lot of other programming languages. For our purposes we chose to stick with \textit{Python} since there are many great tools available with regards to data analysis and visualisation. To further reorganise the collected data we used the well-known \textit{pandas} \cite{pandas} data analysis and manipulation tool. For data visualisation, we decided to use \textit{Plotly} \cite{plotly}, an open source graphing library. With the power of \textit{Python} and \textit{pandas}, it was relatively straight-forward to convert the collected data into the representation expected by \textit{Plotly} to create graphs. And due to the fact that we were using \textit{Jupyter}, we could immediately see the generated graphs.
 
 \section{Findings}
 \label{sec:findings}
 
+Before discussing the findings we made, we will provide a short overview of the amount of data we collected as well as the amount of data which was eventually incorporated to generate the results in this section.
+
+% ls data | wc -l
+% ls data | grep monster | wc -l
+% ls data | grep indeed | wc -l
+% ls data | grep stepstone | wc -l
+
+In total, we scraped 1538 job advertisements from all three websites. These are composed of 993 from \textit{Monster}, 282 from \textit{Indeed} and 263 from \textit{StepStone}. These results were aggregated over a timespan of about two months by rerunning the scraping tasks roughly once per week in order to scrape newly added job advertisements.
+
+After a review of the scraped data, we found that many advertised jobs had nothing to do with information security at all and were simply included as a consequence of the loose search algorithm provided by the job search websites. We therefore decided to add a final filter to the data depending to the job title. Once we added this filter we were left with 121 information security jobs out of 1538 total scraped jobs. All graphs presented in this section are based on this number.
+
+Let us begin with the employment type. For the employment type we used two different distinctions: full-time vs. part-time positions and permanent vs. temporary positions.
+
+In \autoref{fig:employment_type_chart} we can see that 95\% of cybersecurity jobs are listed as full-time positions and the remaining 5\% do not specify this information at all. The permanence of the position is even less common with only 3.3\% of permanent positions and the remaining 96.7\% leaving this information unspecified. In general, the assumption for leaving this information unspecified is a permanent full-time position, which means that at this point virtually all open cybersecurity positions are permanent full-time positions.
+
+\begin{figure}[H]
+	\centering
+  \includegraphics[width=\textwidth]{employment-type-bar-chart.pdf}
+	\caption{Employment Type}
+	\label{fig:employment_type_chart}
+\end{figure}
+
+Next up we will take a look at the required level of education for information security jobs. As shown in \autoref{fig:education_chart}, the majority of positions -- around 59\% -- require a bachelor's degree while only around 9\% require a master's degree. The second most common requirement is an apprenticeship (Ausbildung) at around 36\%, followed by the Matura with 22\%. After a manual review of the 4\% belonging to apprenticeship (Lehre), these seem to be mostly false positives, at least in our case when only taking information security jobs into account.
+
+\begin{figure}[H]
+	\centering
+  \includegraphics[width=\textwidth]{education-bar-chart.pdf}
+	\caption{Education}
+	\label{fig:education_chart}
+\end{figure}
+
+The distribution across the states of Austria was another point we wanted to analyse. The vast majority of advertisements are for positions in Vienna at about 57\%. Of the other states, only Carinthia, Styria and Upper Austria manage to pass the 5\% threshold. Tyrol and Salzburg are both at around 4\% and Lower Austria is at less than 1\% of all advertisements. Vorarlberg and Burgenland do not even have one job advertisement listed.
+
+\begin{figure}[H]
+	\centering
+  \includegraphics[width=\textwidth]{location-bar-chart.pdf}
+	\caption{Location}
+	\label{fig:location_chart}
+\end{figure}
+
+To further analyse this, we used the population data included in the Austria Cities Database \cite{austria_cities_database} we used for data cleaning and calculated the per capita numbers for each state as seen in \autoref{fig:location_per_capita_chart}. The vast majority of advertisements were still for positions in Vienna with almost 3 times as many as the per capita in Carinthia. The relative order of Tyrol, Salzburg and Carinthia stayed the same while both Styria and Upper Austria dropped by two places, respectively. Most surprising of all is still Lower Austria with the lowest per capita of all states with more than 0 advertisement. This is especially surprising since Lower Austria encloses Vienna. The close vicinity to Vienna is probably a decisive reason for this dramatic disparity.
+
+\begin{figure}[H]
+	\centering
+  \includegraphics[width=\textwidth]{location-per-capita-bar-chart.pdf}
+	\caption{Location per Capita}
+	\label{fig:location_per_capita_chart}
+\end{figure}
+
+Let us now look at the average salary. According to our collected data, the total average salary for information security jobs in Austria is 3715.66 € per month. When looking at the numbers per state, we can see the average salary ranging from 3079 € in Tyrol to 4160 € in Salzburg. Given this range we already see a surprisingly huge difference of 1081 € between two the neighboring states Tyrol and Salzburg. The average salary in Vienna is closest to the country's total average with only a 1\% deviation. For Lower Austria as well as Burgenland and Vorarlberg we could not extract any salary data.
+
+\begin{figure}[H]
+	\centering
+  \includegraphics[width=\textwidth]{average-salary-bar-chart.pdf}
+	\caption{Salary}
+	\label{fig:salary_chart}
+\end{figure}
+
+Lastly we will analyse the certifications we extracted. Among the most popularly required certifications are CISM, CISA, ITIL, CISSP and ISO/IEC~27001 (refer to \autoref{tab:certifications} for the certifications' descriptions) with all being specified in at least 20\% of advertisements. With 26\% of jobs advertisements mentioning ISO/IEC~27001, it is by far the most requested requirement. In total, 62 out of 121 job advertisements -- 51 \% --, specify at least one certification as a requirement.
+
+\begin{figure}[H]
+	\centering
+  \includegraphics[width=\textwidth]{certifications-bar-chart.pdf}
+	\caption{Certifications}
+	\label{fig:certifications_chart}
+\end{figure}
+
+\section{Future Work}
+\label{sec:future_work}
+
+Some more data points which were not possible to be extracted in this survey could be implemented in a future revision. This includes, for example, the occupational field, which in our survey was not included since only one of the three websites provided this information. Another example includes required knowledge of technologies, which would require a more sophisticated data extraction method than the one used in this survey.
+
+Of course, in order to reduce the chance of outliers skewing the results, the survey could be conducted again within a longer timespan and if possible with additional job search websites.
+
 \section{Conclusion}
 \label{sec:conclusion}
+
+In this paper we compared multiple scraping tools highlighting their strong and weak points. Using our chosen scraping tool, we subsequently developed a program for scraping data from three job search sites and used the gathered data to form an overview of the information security job landscape in Austria. Finally, we presented our findings made by analysing the gathered data. These findings can hopefully be used to inform new decisions on what should be taught in universities with regards to information security in order to teach students the skills necessary to succeed in the information security sector.
 
 \newpage
 \printbibliography
