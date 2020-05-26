@@ -152,7 +152,7 @@ def parse_file(path):
     data['location']['states'] = list(set(data['location']['states'] + location['states']))
 
   data['salary'] = guess_salary(words)
-  data['degrees'] = guess_education(words)
+  data['education_type'] = guess_education(words)
 
   if json_data.get('contract_type', None):
     data['employment_type'] = guess_employment_types(clean_text(json_data['contract_type']))
@@ -216,7 +216,7 @@ if __name__ == '__main__':
   print('Total Results:', len(result))
   # print('Language found for ', sum([1 for v in result if v['language']]))
   print('Salary found for ', sum([1 for v in result if v['salary']]))
-  print('Degrees found for ', sum([1 for v in result if v['degrees']]))
+  print('Education Type found for ', sum([1 for v in result if v['education_type']]))
   print('Employment type found for ', sum([1 for v in result if v['employment_type']]))
   print('Places found for ', sum([1 for v in result if v['location']['cities'] or v['location']['states']]))
   print('Certifications found for ', sum([1 for v in result if v['certifications']]))
