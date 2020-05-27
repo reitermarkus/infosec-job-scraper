@@ -160,6 +160,10 @@ task jupyter: :python_venv do
   exec 'jupyter', 'notebook', '.'
 end
 
+task graphs: :python_venv do
+  sh 'jupyter', 'nbconvert', '--to', 'notebook', '--ClearOutputPreprocessor.enabled=True', '--execute', 'nlp/graphs.ipynb', '--inplace'
+end
+
 task :tex do
   cd 'paper'
   sh 'latexmk', '-cd'
