@@ -1,6 +1,13 @@
 \documentclass[runningheads]{llncs}
 
+\linespread{1.1}
+
+\usepackage{lmodern}
+\usepackage[english]{babel}
+
 \usepackage{fontspec}
+
+\raggedbottom
 
 \usepackage{multicol}
 
@@ -8,8 +15,11 @@
 \usepackage{graphicx}
 \graphicspath{{assets/}}
 \usepackage{listings}
-\usepackage[hyphens]{url}
+
+\PassOptionsToPackage{hyphens}{url}
 \usepackage{hyperref}
+\usepackage{cleveref}
+\usepackage{nameref}
 
 \usepackage[
   style   = numeric,
@@ -19,7 +29,7 @@
 
 \begin{document}
 
-\title{Analysis of the \\ Information Security Job Landscape \\ in Austria}
+\title{Analysis of the \texorpdfstring{\\}{} Information Security Job Landscape \texorpdfstring{\\}{} in Austria}
 
 \author{Markus Reiter}
 
@@ -27,7 +37,7 @@
 
 \maketitle
 
-\newpage
+\vspace{8em}
 
 \begin{abstract}
 
@@ -149,13 +159,9 @@ A detail page on \textit{StepStone} contains the job title at the top, followed 
 Now that we had successfully built the foundation for properly scraping all websites, the last step was to store the scraped data in a format which can be used for further processing. Using a full-fledged database solution, e.g. MySQL or Postgres, was out of the question from the start. Setting up a dedicated database server for what is -- relatively speaking -- a very small amount of data would add too much maintenance overhead. Another aspect to consider is the data layout.
 In database terms, we need to store only a single table of data, which was another reason why we decided against using a database for storing the collected data altogether. This included embedded databases like SQLite which consist of a single file and don't need a dedicated server and client. Ultimately we decided on storing each scraping result in a separate \textit{JSON} file. \textit{JSON} is heavily used for APIs on the web which means that virtually every programming language supports deserialising and serialising data in \textit{JSON} format. To avoid duplicates, we chose to save the files as \texttt{<website>-<id>.json} where \texttt{<website>} is the name of the website, i.e. \texttt{monster}, \texttt{indeed} or \texttt{stepstone}. For the \texttt{id} we calculate the SHA2 checksum of the URL.
 
-For example, the scraped data from the URL
-
-\url{https://at.indeed.com/rc/clk?jk=db6f5459c93e648c&fccid=1272531993b16790&vjs=3}
-
-would be saved as
-
-\texttt{indeed-43da336235334055a25f32a55e7cd343128905d782cd749349659ca3d3d38174.json}
+For example, the scraped data from the URL \\
+\texttt{https://at.indeed.com/rc/clk?jk=db6f5459c93e648c\&fccid=1272531993b\\16790\&vjs=3} would be saved as
+\texttt{indeed-43da336235334055a25f32a55e7cd3431\\28905d782cd749349659ca3d3d38174.json}.
 
 \subsubsection{Removal of Duplicates}
 \label{subsub:removal_of_duplicates}
@@ -247,7 +253,7 @@ Furthermore, we used a database containing all major cities in Austria \cite{aus
 
 Up next was the extraction of certifications. We found an article listing the most prominent certifcations of the year 2020 \cite{certifications}. Incidentally, the authors of this article also retrieved this list from performing a job board survey. Using the list of certifications mentioned in the article and a manual review of the scraped data, we came up with a list (as can be seen in \autoref{tab:certifications}) of all the certifications we wanted to extract.
 
-\begin{table}[h]
+\begin{table}[ht]
 	\centering
   \caption{List of extracted certifications.}
   \label{tab:certifications}
@@ -290,12 +296,6 @@ Before discussing the findings we made, we will provide a short overview of the 
 
 In total, we scraped 1538 job advertisements from all three websites. These are composed of 993 from \textit{Monster}, 282 from \textit{Indeed} and 263 from \textit{StepStone}. These results were aggregated over a timespan of about two months by rerunning the scraping tasks roughly once per week in order to scrape newly added job advertisements.
 
-After a review of the scraped data, we found that many advertised jobs had nothing to do with information security at all and were simply included as a consequence of the loose search algorithm provided by the job search websites. We therefore decided to add a final filter to the data depending to the job title. Once we added this filter we were left with 121 information security jobs out of 1538 total scraped jobs. All graphs presented in this section are based on this number.
-
-Let us begin with the employment type. For the employment type we used two different distinctions: full-time vs. part-time positions and permanent vs. temporary positions.
-
-In \autoref{fig:employment_type_chart} we can see that 95\% of cybersecurity jobs are listed as full-time positions and the remaining 5\% do not specify this information at all. The permanence of the position is even less common with only 3.3\% of permanent positions and the remaining 96.7\% leaving this information unspecified. In general, the assumption for leaving this information unspecified is a permanent full-time position, which means that at this point virtually all open cybersecurity positions are permanent full-time positions.
-
 \begin{figure}[H]
 	\centering
   \includegraphics[width=\textwidth]{employment-type-bar-chart.pdf}
@@ -303,7 +303,13 @@ In \autoref{fig:employment_type_chart} we can see that 95\% of cybersecurity job
 	\label{fig:employment_type_chart}
 \end{figure}
 
-Next up we will take a look at the required level of education for information security jobs. As shown in \autoref{fig:education_chart}, the majority of positions -- around 59\% -- require a bachelor's degree while only around 9\% require a master's degree. The second most common requirement is an apprenticeship (Ausbildung) at around 36\%, followed by the Matura with 22\%. After a manual review of the 4\% belonging to apprenticeship (Lehre), these seem to be mostly false positives, at least in our case when only taking information security jobs into account.
+After a review of the scraped data, we found that many advertised jobs had nothing to do with information security at all and were simply included as a consequence of the loose search algorithm provided by the job search websites. We therefore decided to add a final filter to the data depending to the job title. Once we added this filter we were left with 121 information security jobs out of 1538 total scraped jobs. All graphs presented in this section are based on this number.
+
+Let us begin with the employment type. For the employment type we used two different distinctions: full-time vs. part-time positions and permanent vs. temporary positions.
+
+In \autoref{fig:employment_type_chart} we can see that 95\% of cybersecurity jobs are listed as full-time positions and the remaining 5\% do not specify this information at all. The permanence of the position is even less common with only 3.3\% of permanent positions and the remaining 96.7\% leaving this information unspecified. In general, the assumption for leaving this information unspecified is a permanent full-time position, which means that at this point virtually all open cybersecurity positions are permanent full-time positions.
+
+Next up we will take a look at the required level of education for information security jobs. As shown in \autoref{fig:education_chart}, the majority of positions -- around 59\% -- require a bachelor's degree while only around 9\% require a master's degree.
 
 \begin{figure}[H]
 	\centering
@@ -312,7 +318,7 @@ Next up we will take a look at the required level of education for information s
 	\label{fig:education_chart}
 \end{figure}
 
-The distribution across the states of Austria was another point we wanted to analyse. The vast majority of advertisements are for positions in Vienna at about 57\%. Of the other states, only Carinthia, Styria and Upper Austria manage to pass the 5\% threshold. Tyrol and Salzburg are both at around 4\% and Lower Austria is at less than 1\% of all advertisements. Vorarlberg and Burgenland do not even have one job advertisement listed.
+The second most common requirement is an apprenticeship (Ausbildung) at around 36\%, followed by the Matura with 22\%. After a manual review of the 4\% belonging to apprenticeship (Lehre), these seem to be mostly false positives, at least in our case when only taking information security jobs into account.
 
 \begin{figure}[H]
 	\centering
@@ -321,7 +327,7 @@ The distribution across the states of Austria was another point we wanted to ana
 	\label{fig:location_chart}
 \end{figure}
 
-To further analyse this, we used the population data included in the Austria Cities Database \cite{austria_cities_database} we used for data cleaning and calculated the per capita numbers for each state as seen in \autoref{fig:location_per_capita_chart}. The vast majority of advertisements were still for positions in Vienna with almost 3 times as many as the per capita in Carinthia. The relative order of Tyrol, Salzburg and Carinthia stayed the same while both Styria and Upper Austria dropped by two places, respectively. Most surprising of all is still Lower Austria with the lowest per capita of all states with more than 0 advertisement. This is especially surprising since Lower Austria encloses Vienna. The close vicinity to Vienna is probably a decisive reason for this dramatic disparity.
+The distribution across the states of Austria was another point we wanted to analyse. The vast majority of advertisements are for positions in Vienna at about 57\%.
 
 \begin{figure}[H]
 	\centering
@@ -329,6 +335,10 @@ To further analyse this, we used the population data included in the Austria Cit
 	\caption{Location per Capita}
 	\label{fig:location_per_capita_chart}
 \end{figure}
+
+Of the other states, only Carinthia, Styria and Upper Austria manage to pass the 5\% threshold. Tyrol and Salzburg are both at around 4\% and Lower Austria is at less than 1\% of all advertisements. Vorarlberg and Burgenland do not even have one job advertisement listed.
+
+To further analyse this, we used the population data included in the Austria Cities Database \cite{austria_cities_database} we used for data cleaning and calculated the per capita numbers for each state as seen in \autoref{fig:location_per_capita_chart}. The vast majority of advertisements were still for positions in Vienna with almost 3 times as many as the per capita in Carinthia. The relative order of Tyrol, Salzburg and Carinthia stayed the same while both Styria and Upper Austria dropped by two places, respectively. Most surprising of all is still Lower Austria with the lowest per capita of all states with more than 0 advertisement. This is especially surprising since Lower Austria encloses Vienna. The close vicinity to Vienna is probably a decisive reason for this dramatic disparity.
 
 Let us now look at the average salary. According to our collected data, the total average salary for information security jobs in Austria is 3715.66 € per month. When looking at the numbers per state, we can see the average salary ranging from 3079 € in Tyrol to 4160 € in Salzburg. Given this range we already see a surprisingly huge difference of 1081 € between two the neighboring states Tyrol and Salzburg. The average salary in Vienna is closest to the country's total average with only a 1\% deviation. For Lower Austria as well as Burgenland and Vorarlberg we could not extract any salary data.
 
@@ -348,17 +358,14 @@ Lastly we will analyse the certifications we extracted. Among the most popularly
 	\label{fig:certifications_chart}
 \end{figure}
 
-\section{Future Work}
-\label{sec:future_work}
-
-Some more data points which were not possible to be extracted in this survey could be implemented in a future revision. This includes, for example, the occupational field, which in our survey was not included since only one of the three websites provided this information. Another example includes required knowledge of technologies, which would require a more sophisticated data extraction method than the one used in this survey.
-
-Of course, in order to reduce the chance of outliers skewing the results, the survey could be conducted again within a longer timespan and if possible with additional job search websites.
-
 \section{Conclusion}
 \label{sec:conclusion}
 
 In this paper we compared multiple scraping tools highlighting their strong and weak points. Using our chosen scraping tool, we subsequently developed a program for scraping data from three job search sites and used the gathered data to form an overview of the information security job landscape in Austria. Finally, we presented our findings made by analysing the gathered data. These findings can hopefully be used to inform new decisions on what should be taught in universities with regards to information security in order to teach students the skills necessary to succeed in the information security sector.
+
+Some more data points which were not possible to be extracted in this survey could be implemented in a future revision. This includes, for example, the occupational field, which in our survey was not included since only one of the three websites provided this information. Another example includes required knowledge of technologies, which would require a more sophisticated data extraction method than the one used in this survey.
+
+Of course, in order to reduce the chance of outliers skewing the results, the survey could be conducted again within a longer timespan and if possible with additional job search websites.
 
 \newpage
 \printbibliography
