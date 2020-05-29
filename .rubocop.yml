@@ -7,6 +7,9 @@ Layout/EmptyLinesAroundAttributeAccessor:
 Layout/EndAlignment:
   EnforcedStyleAlignWith: variable
 
+Layout/RescueEnsureAlignment:
+  Enabled: false
+
 Layout/LineLength:
   Max: 120
 
