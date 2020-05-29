@@ -1,3 +1,7 @@
+# Paper
+
+[View Paper](http://reitermark.us/infosec-job-scraper/paper.pdf)
+
 # Dependencies
 
 ```
