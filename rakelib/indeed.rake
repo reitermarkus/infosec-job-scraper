@@ -34,13 +34,15 @@ module Indeed
 
     title = find_element(css: '.jobsearch-ViewJobLayout-jobDisplay .jobsearch-JobInfoHeader-title')
     location = begin
-      find_element(css: '.jobsearch-JobMetadataHeader-itemWithIcon .icl-IconFunctional--location + .jobsearch-JobMetadataHeader-iconLabel')
+      find_element(css: '.jobsearch-JobMetadataHeader-itemWithIcon ' \
+                        '.icl-IconFunctional--location + .jobsearch-JobMetadataHeader-iconLabel')
         .text.strip
     rescue Selenium::WebDriver::Error::NoSuchElementError
       nil
     end
     contract_type = begin
-      find_element(css: '.jobsearch-JobMetadataHeader-itemWithIcon .icl-IconFunctional--jobs + .jobsearch-JobMetadataHeader-iconLabel')
+      find_element(css: '.jobsearch-JobMetadataHeader-itemWithIcon ' \
+                        '.icl-IconFunctional--jobs + .jobsearch-JobMetadataHeader-iconLabel')
         .text.strip
     rescue Selenium::WebDriver::Error::NoSuchElementError
       nil
