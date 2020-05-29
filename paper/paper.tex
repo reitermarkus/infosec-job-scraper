@@ -27,6 +27,8 @@
 ]{biblatex}
 \bibliography{paper}
 
+\newcommand{\german}[1]{{#1}}
+
 \begin{document}
 
 \title{Analysis of the \texorpdfstring{\\}{} Information Security Job Landscape \texorpdfstring{\\}{} in Austria}
@@ -41,7 +43,7 @@
 
 \begin{abstract}
 
-In this paper we present a survery conducted by scraping and analysing various job search webites in order to get an overview of the current situation and trends regarding the information security job landscape in Austria.
+In this paper we present a survey conducted by scraping and analysing various job search websites in order to get an overview of the current situation and trends regarding the information security job landscape in Austria.
 
 \keywords{Information Security \and Scraping \and Job Advertisements}
 
@@ -52,7 +54,7 @@ In this paper we present a survery conducted by scraping and analysing various j
 \section{Introduction}
 \label{sec:introduction}
 
-Information security management is more and more becoming an essential area of expertise for large and small companies alike. In order to get a better understanding of what the information security job landscape looks like in Austria, we conducted a survey of three job search websites popular in Austria: \textit{Monster}~\cite{monster}, \textit{Indeed}~\cite{indeed} and \textit{StepStone}~\cite{stepstone}. Our survey is comprised of three main steps: Firstly, we needed to scrape data each of the three job search websites. As will be explained in more detail in \autoref{sec:evaluation_of_scraping_tools}, we evaluated various scraping tools before we advanced to the actual implementation of the scraping process which will be explained in \autoref{sec:implementation}. The second part of our survey was then to use natural language processing in order to generate a more or less structured version of the information contained in the mostly unstructured text of the job advertisements. Lastly, we analysed and visualised the output data from the natural language processing step in order to fulfill our objective of forming a good overall perspective of the cybersecurity job landscape in Austria. In \autoref{sec:findings} we will present the findings we made during this process.
+Information security management is more and more becoming an essential area of expertise for large and small companies alike. In order to get a better understanding of what the information security job landscape looks like in Austria, we conducted a survey of three job search websites popular in Austria: \textit{Monster}~\cite{monster}, \textit{Indeed}~\cite{indeed} and \textit{StepStone}~\cite{stepstone}. Our survey is comprised of three main steps: Firstly, we needed to scrape data each of the three job search websites. As will be explained in more detail in \autoref{sec:evaluation_of_scraping_tools}, we evaluated various scraping tools before we advanced to the actual implementation of the scraping process which will be explained in \autoref{sec:implementation}. The second part of our survey was then to use natural language processing in order to generate a more or less structured version of the information contained in the mostly unstructured text of the job advertisements. Lastly, we analysed and visualised the output data from the natural language processing step in order to fulfil our objective of forming a good overall perspective of the cybersecurity job landscape in Austria. In \autoref{sec:findings} we will present the findings we made during this process.
 
 \section{Evaluation of Scraping Tools}
 \label{sec:evaluation_of_scraping_tools}
@@ -71,7 +73,7 @@ For each website, we would have to implement two steps. First, we need to scrape
 
 As a first step, we tried scraping a detail page for a single job advertisement on \texttt{monster.at}. And it was a good thing we did, since it immediately highlighted a major problem. A job detail page on \texttt{monster.at} always includes the actual content of the advertisement inside of a nested \texttt{iframe} element. Using \textit{ScrapeStorm}, we were able to select that \texttt{iframe} element, but we failed to extract any data or text from it. The only thing we got was an empty string. This meant that we had to abandon the idea of using \textit{ScrapeStorm} for our purposes.
 
-With this setback, we now had to find another way to scrape this data. After taking a second look at the \textit{ScrapingBot} homepage, we saw that it is using headless \textit{Chrome} for its backend. We decided to venture further into this direction and found \textit{Selenium} \cite{selenium}, which can be used to programmatically use a web browser.
+With this setback, we now had to find another way to scrape this data. After taking a second look at the \textit{ScrapingBot} homepage, we saw that it is using headless \textit{Chrome} for its back-end. We decided to venture further into this direction and found \textit{Selenium} \cite{selenium}, which can be used to programmatically use a web browser.
 
 \textit{Selenium} supports all of the major web browsers, the only thing you need is the so called “webdriver” for the corresponding browser. Additionally, \textit{Selenium} can be used with a wide array of programming languages. For our purposes we chose to go with the Ruby version of \textit{Selenium}. Specifically, we chose to use \textit{Rake} \cite{rake}, which is similar to \textit{Make}, since it allows us to use the full functionality of \textit{Ruby} \cite{ruby} and specify tasks for each website. These scraping tasks can then be run with a simple \texttt{rake} command.
 
@@ -127,14 +129,14 @@ The final workflow now looked like this:
     Select all result URLs and collect them into an array.
 \end{enumerate}
 
-For the second part, the detail page of the job advertisement, we could now loop through all URLs and extract information from each one. On \textit{Monster}, each detail page contains the job title and a subtitle. The subtitle usually contains the location of the open position. Additionally, there is a sidebar which contains further metadata like the contract type, category, carreer level and publication date. The main content of the job advertisement is embedded into a nested \texttt{iframe} element. As mentioned in \autoref{sec:evaluation_of_scraping_tools}, using \textit{Selenium}, we could easily extract the content of this \texttt{iframe} element using the \texttt{switch\_to} function. All other data we could extract equally easily by selecting the corresponding elements using CSS selectors.
+For the second part, the detail page of the job advertisement, we could now loop through all URLs and extract information from each one. On \textit{Monster}, each detail page contains the job title and a subtitle. The subtitle usually contains the location of the open position. Additionally, there is a sidebar which contains further metadata like the contract type, category, career level and publication date. The main content of the job advertisement is embedded into a nested \texttt{iframe} element. As mentioned in \autoref{sec:evaluation_of_scraping_tools}, using \textit{Selenium}, we could easily extract the content of this \texttt{iframe} element using the \texttt{switch\_to} function. All other data we could extract equally easily by selecting the corresponding elements using CSS selectors.
 
 \subsubsection{Indeed}
 \label{subsub:indeed}
 
 For \textit{Indeed} \cite{indeed}, the initial step to implement proper scraping was to implement fetching search results. Luckily, unlike on \textit{Monster}, the search string could be escaped as \texttt{information\%20security} using standardised HTML escape codes.
 
-Pagination on \textit{Indeed} is using a query parameter called \texttt{start} which indicates the offset from the first result. Additionally, the pagination buttons are located at the bottom of the results page. With the “next page” button acting as the stop indicater we can trivially implement the gathering of all detail page URLs as described below:
+Pagination on \textit{Indeed} is using a query parameter called \texttt{start} which indicates the offset from the first result. Additionally, the pagination buttons are located at the bottom of the results page. With the “next page” button acting as the stop indicator we can trivially implement the gathering of all detail page URLs as described below:
 
 \begin{enumerate}
   \item Initialise empty array.
@@ -171,12 +173,12 @@ After a couple of scraping runs, we noticed that there were duplicate results. T
 \subsection{Natural Language Processing}
 \label{sub:natural_language_processing}
 
-Once the scraping was done, we could focus on extracting information from the scraped data. For the purpose of data extraction, we chose Python. Like Ruby, Python is an interpreted and dynamically typed language, which makes it a good canditate for natural language processing since we can iterate over code changes very quickly. We chose Python over Ruby due to the vast amount of libraries and frameworks available dedicated to natural language processing, first and foremost the Natural Language Toolkit (NLTK), arguably one of the most widely used platforms for natural language processing. It contains a great variety of tools including classification, tokenization, stemming, tagging, parsing and semantic reasoning. \cite{nltk}
+Once the scraping was done, we could focus on extracting information from the scraped data. For the purpose of data extraction, we chose Python. Like Ruby, Python is an interpreted and dynamically typed language, which makes it a good candidate for natural language processing since we can iterate over code changes very quickly. We chose Python over Ruby due to the vast amount of libraries and frameworks available dedicated to natural language processing, first and foremost the Natural Language Toolkit (NLTK), arguably one of the most widely used platforms for natural language processing. It contains a great variety of tools including classification, tokenisation, stemming, tagging, parsing and semantic reasoning. \cite{nltk}
 
 \subsubsection{Data Cleaning}
 \label{subsub:data_cleaning}
 
-The first step when performing any sort of natural language processing should be data cleaning. Specifically, this means removing irrelevant data and bringing the data into a format that can be processed more easily than the raw source. In our the main part that needed to be cleaned was the body text of each result. Each result contains the raw HTML source code of the body text, so the first step was to strip the text from any contained HTML tags. We used the aptly named \texttt{html2text} Python package for this purpose. After further inspection of the results, we noticed that some contained formatting, links and images in Markdown format. We quickly realised that \texttt{html2text} is in fact an HTML to Markdown converter instead of a HTML to plain text converter as we previously deemed from the name. Luckily, \texttt{html2text} provides \texttt{ignore\_emphasis}, \texttt{ignore\_links} and \texttt{ignore\_images} options which can be used to remove the Markdown output for these elements. Once we had the plain text version of the body content, we could subsequently use the \texttt{word\_tokenize} function from the NLTK to split the text into tokens to make further processing easier.
+The first step when performing any sort of natural language processing should be data cleaning. Specifically, this means removing irrelevant data and bringing the data into a format that can be processed more easily than the raw source. In our the main part that needed to be cleaned was the body text of each result. Each result contains the raw HTML source code of the body text, so the first step was to strip the text from any contained HTML tags. We used the aptly named \texttt{html2text} Python package for this purpose. After further inspection of the results, we noticed that some contained formatting, links and images in Markdown format. We quickly realised that \texttt{html2text} is in fact an HTML to Markdown converter instead of a HTML to plain text converter as we previously deemed from the name. Luckily, \texttt{html2text} provides \texttt{ignore\_emphasis}, \texttt{ignore\_links} and \texttt{ignore\_images} options which can be used to remove the Markdown output for these elements. Once we had the plain text version of the body content, we could subsequently use the \texttt{word\_tokenise} function from the NLTK to split the text into tokens to make further processing easier.
 
 \subsubsection{Extracting the Salary}
 \label{subsub:extracting_the_salary}
@@ -214,11 +216,11 @@ The first data point we decided to extract was the salary for the advertised job
 
 As seen in \autoref{salary_formats}, the diversity of number formats is quite extensive. To explain the steps we took to further clean the input data, we will define the \texttt{clean\_text} step as cleaning the complete text before it is tokenised and the \texttt{clean\_word} step as cleaning a single word after tokenisation.
 
-The first step we took was to add another substep to our existing \texttt{clean\_text} step in which we used the regular expression \texttt{/(EUR|€)/} and replace it with \texttt{' \textbackslash1 '}, i.e. we add an extra space around \texttt{EUR} and \texttt{€} to cover the case where there is not already a space between the currency and the amount. We don't care about introducing extra spacing when there already is a space since the tokenisation will remove it anyways.
+The first step we took was to add another sub-step to our existing \texttt{clean\_text} step in which we used the regular expression \texttt{/(EUR|€)/} and replace it with \texttt{' \textbackslash1 '}, i.e. we add an extra space around \texttt{EUR} and \texttt{€} to cover the case where there is not already a space between the currency and the amount. We don't care about introducing extra spacing when there already is a space since the tokenisation will remove it anyways.
 
-Now that we have ensured that the currency is separated from the amound, we can add another substep to \texttt{clean\_word}. Here we introduce a trivial replacement and replace all words which are equal to \texttt{'€'}, \texttt{'eur'}, \texttt{'euro'} or \texttt{'euros'} with \texttt{'€'}.
+Now that we have ensured that the currency is separated from the amount, we can add another sub-step to \texttt{clean\_word}. Here we introduce a trivial replacement and replace all words which are equal to \texttt{'€'}, \texttt{'eur'}, \texttt{'euro'} or \texttt{'euros'} with \texttt{'€'}.
 
-Next, we add another substep to \texttt{clean\_word} which removes any trailing \texttt{',-'} from numbers. We use a regular expression here to also catch cases with more than a single hyphen. Similarly to the trailing \texttt{',-'}, we replace a trailing \texttt{'k'} with \texttt{'000'}.
+Next, we add another sub-step to \texttt{clean\_word} which removes any trailing \texttt{',-'} from numbers. We use a regular expression here to also catch cases with more than a single hyphen. Similarly to the trailing \texttt{',-'}, we replace a trailing \texttt{'k'} with \texttt{'000'}.
 
 The only thing left to do now is to normalise the decimal format (i.e. \texttt{XXXXX,XX}, \texttt{XXXXX.XX}, \texttt{XX.XXX,XX}) \texttt{XX,XXX.XX}, to \texttt{XXXXX.XX} in order to be able parse it in a later step. For the normalisation, we assume that the salary amount has at most two decimal places. We use a regular expression to match 0-2 decimal places with any delimiter symbol and group everything else together. This gives use the integer part with all delimiter symbols and the decimal part as only numbers. Now we simply remove all delimiters from the integer part and combine both parts again with a \texttt{'.'}.
 
@@ -227,13 +229,13 @@ In order to eventually extract the salary, we loop through all cleaned tokens as
 \subsubsection{Extracting the Type of Education}
 \label{subsub:extracting_the_type_of_education}
 
-Another data point we wanted to extract is the level of education required for a given job. We started by looking at some advertisements and then began building some patterns which we could use in our \texttt{guess\_education} function. Some obvious patterns include \texttt{<type>-Abschluss} and \texttt{<type>abschluss} with concrete examples being “HAK-Abschluss” and “Pflichtschulabschluss”. Since the \texttt{guess\_education} function receives the input as individual tokens, compound words including acronyms such as “HTL-Abschluss” would already be split into \texttt{'htl'} and \texttt{'abschluss'}. Given that there are only a handful of acronyms we decided for simplicity's sake to hardcode the most common ones: \texttt{'hak'}, \texttt{'hbla'}, \texttt{'htl'}, \texttt{'hlw'} and \texttt{'lfs'}. We grouped all of these into the \texttt{matura} category. Still, there were some patterns which fall into this category which were not yet recognized, such as “Matura” as a standalone term or “Fachschulabschluss”. For these, we simply check if any word contains these terms.
+Another data point we wanted to extract is the level of education required for a given job. We started by looking at some advertisements and then began building some patterns which we could use in our \texttt{guess\_education} function. Some obvious patterns include \texttt{<type>-Abschluss} and \texttt{<type>abschluss} with concrete examples being “\german{HAK-Abschluss}” and “\german{Pflichtschulabschluss}”. Since the \texttt{guess\_education} function receives the input as individual tokens, compound words including acronyms such as “\german{HTL-Abschluss}” would already be split into \texttt{'htl'} and \texttt{'abschluss'}. Given that there are only a handful of acronyms we decided for simplicity's sake to hardcode the most common ones: \texttt{'hak'}, \texttt{'hbla'}, \texttt{'htl'}, \texttt{'hlw'} and \texttt{'lfs'}. We grouped all of these into the \texttt{matura} category. Still, there were some patterns which fall into this category which were not yet recognised, such as “\german{Matura}” as a standalone term or “\german{Fachschulabschluss}”. For these, we simply check if any word contains these terms.
 
-The next two obvious education types were the bachelor's and master's degree. For these, we again simply checked if any word contains the respective term and categorise them accordingly. Another related education type is an FH (Fachhochschule) degree which can be equivalent to either a bachelor's or master's degree. Here we again took the same approach as for the \texttt{matura} category, since both “FH-Abschluss” and “Fachhochschulabschluss” are commonly used terms.
+The next two obvious education types were the bachelor's and master's degree. For these, we again simply checked if any word contains the respective term and categorise them accordingly. Another related education type is an FH (Fachhochschule) degree which can be equivalent to either a bachelor's or master's degree. Here we again took the same approach as for the \texttt{matura} category, since both “\german{FH-Abschluss}” and “\german{Fachhochschulabschluss}” are commonly used terms.
 
-With these types for higher levels of education covered, we could guess the education level only for less than half of the results. One type we missed previously was the completion of compulsory school. With compulsory school added to the list, we still were only detecting an education type for around half of all results. After inspecting some of the results which were still missing an education type, we found the two types which were still missing: completed apprenticeship (often referred to as “abgeschlossene Ausbildung”) and completed apprenticeship (often referred to as “abgeschlossene Lehre”).
+With these types for higher levels of education covered, we could guess the education level only for less than half of the results. One type we missed previously was the completion of compulsory school. With compulsory school added to the list, we still were only detecting an education type for around half of all results. After inspecting some of the results which were still missing an education type, we found the two types which were still missing: completed apprenticeship (often referred to as “\german{abgeschlossene Ausbildung}”) and completed apprenticeship (often referred to as “\german{abgeschlossene Lehre}”).
 
-With these two types the extraction rate was now at approximately 90\%. A few more results could be detected by extracting the words \texttt{'studium'} and \texttt{'universität'}/\texttt{'university'}, since some job advertisements refer to a bachelor's degree simply as “abgeschlossenes Studium” (completed studies) or list “Universität”/“University” as a requirement.
+With these two types the extraction rate was now at approximately 90\%. A few more results could be detected by extracting the words \texttt{'studium'} and \texttt{'universität'}/\texttt{'university'}, since some job advertisements refer to a bachelor's degree simply as “\german{abgeschlossenes Studium}” (completed studies) or list “\german{Universität}”/“University” as a requirement.
 
 
 \subsubsection{Extracting the Type of Employment}
@@ -251,7 +253,7 @@ Furthermore, we used a database containing all major cities in Austria \cite{aus
 \subsubsection{Extracting of Certifications}
 \label{subsub:extracting_of_certifications}
 
-Up next was the extraction of certifications. We found an article listing the most prominent certifcations of the year 2020 \cite{certifications}. Incidentally, the authors of this article also retrieved this list from performing a job board survey. Using the list of certifications mentioned in the article and a manual review of the scraped data, we came up with a list (as can be seen in \autoref{tab:certifications}) of all the certifications we wanted to extract.
+Up next was the extraction of certifications. We found an article listing the most prominent certifications of the year 2020 \cite{certifications}. Incidentally, the authors of this article also retrieved this list from performing a job board survey. Using the list of certifications mentioned in the article and a manual review of the scraped data, we came up with a list (as can be seen in \autoref{tab:certifications}) of all the certifications we wanted to extract.
 
 \begin{table}[ht]
 	\centering
@@ -294,7 +296,7 @@ Before discussing the findings we made, we will provide a short overview of the 
 % ls data | grep indeed | wc -l
 % ls data | grep stepstone | wc -l
 
-In total, we scraped 1538 job advertisements from all three websites. These are composed of 993 from \textit{Monster}, 282 from \textit{Indeed} and 263 from \textit{StepStone}. These results were aggregated over a timespan of about two months by rerunning the scraping tasks roughly once per week in order to scrape newly added job advertisements.
+In total, we scraped 1538 job advertisements from all three websites. These are composed of 993 from \textit{Monster}, 282 from \textit{Indeed} and 263 from \textit{StepStone}. These results were aggregated over a time span of about two months by rerunning the scraping tasks roughly once per week in order to scrape newly added job advertisements.
 
 \begin{figure}[H]
 	\centering
@@ -336,11 +338,11 @@ The distribution across the states of Austria was another point we wanted to ana
 	\label{fig:location_per_capita_chart}
 \end{figure}
 
-Of the other states, only Carinthia, Styria and Upper Austria manage to pass the 5\% threshold. Tyrol and Salzburg are both at around 4\% and Lower Austria is at less than 1\% of all advertisements. Vorarlberg and Burgenland do not even have one job advertisement listed.
+Of the other states, only Carinthia, Styria and Upper Austria manage to pass the 5\% threshold. Tirol and Salzburg are both at around 4\% and Lower Austria is at less than 1\% of all advertisements. Vorarlberg and Burgenland do not even have one job advertisement listed.
 
-To further analyse this, we used the population data included in the Austria Cities Database \cite{austria_cities_database} we used for data cleaning and calculated the per capita numbers for each state as seen in \autoref{fig:location_per_capita_chart}. The vast majority of advertisements were still for positions in Vienna with almost 3 times as many as the per capita in Carinthia. The relative order of Tyrol, Salzburg and Carinthia stayed the same while both Styria and Upper Austria dropped by two places, respectively. Most surprising of all is still Lower Austria with the lowest per capita of all states with more than 0 advertisement. This is especially surprising since Lower Austria encloses Vienna. The close vicinity to Vienna is probably a decisive reason for this dramatic disparity.
+To further analyse this, we used the population data included in the Austria Cities Database \cite{austria_cities_database} we used for data cleaning and calculated the per capita numbers for each state as seen in \autoref{fig:location_per_capita_chart}. The vast majority of advertisements were still for positions in Vienna with almost 3 times as many as the per capita in Carinthia. The relative order of Tirol, Salzburg and Carinthia stayed the same while both Styria and Upper Austria dropped by two places, respectively. Most surprising of all is still Lower Austria with the lowest per capita of all states with more than 0 advertisement. This is especially surprising since Lower Austria encloses Vienna. The close vicinity to Vienna is probably a decisive reason for this dramatic disparity.
 
-Let us now look at the average salary. According to our collected data, the total average salary for information security jobs in Austria is 3715.66 € per month. When looking at the numbers per state, we can see the average salary ranging from 3079 € in Tyrol to 4160 € in Salzburg. Given this range we already see a surprisingly huge difference of 1081 € between two the neighboring states Tyrol and Salzburg. The average salary in Vienna is closest to the country's total average with only a 1\% deviation. For Lower Austria as well as Burgenland and Vorarlberg we could not extract any salary data.
+Let us now look at the average salary. According to our collected data, the total average salary for information security jobs in Austria is 3715.66 € per month. When looking at the numbers per state, we can see the average salary ranging from 3079 € in Tirol to 4160 € in Salzburg. Given this range we already see a surprisingly huge difference of 1081 € between two the neighbouring states Tirol and Salzburg. The average salary in Vienna is closest to the country's total average with only a 1\% deviation. For Lower Austria as well as Burgenland and Vorarlberg we could not extract any salary data.
 
 \begin{figure}[H]
 	\centering
@@ -365,7 +367,7 @@ In this paper we compared multiple scraping tools highlighting their strong and 
 
 Some more data points which were not possible to be extracted in this survey could be implemented in a future revision. This includes, for example, the occupational field, which in our survey was not included since only one of the three websites provided this information. Another example includes required knowledge of technologies, which would require a more sophisticated data extraction method than the one used in this survey.
 
-Of course, in order to reduce the chance of outliers skewing the results, the survey could be conducted again within a longer timespan and if possible with additional job search websites.
+Of course, in order to reduce the chance of outliers skewing the results, the survey could be conducted again within a longer time span and if possible with additional job search websites.
 
 \newpage
 \printbibliography

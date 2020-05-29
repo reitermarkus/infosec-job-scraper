@@ -15,7 +15,7 @@ jobs:
         uses: reitermarkus/aspell@master
         with:
           files: paper/paper.tex
-          args: --lang=en_GB --mode=tex
+          args: --lang en_GB --mode tex --personal ./paper/aspell.en_GB.pws --tex-check-comments --add-tex-command texttt\ op --add-tex-command cite\ op --add-tex-command german\ p
       - name: Compile Paper
         uses: reitermarkus/latexmk@master
       - name: Upload Paper
