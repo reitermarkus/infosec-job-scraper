@@ -1,6 +1,9 @@
 AllCops:
   TargetRubyVersion: 2.6
 
+Layout/EmptyLinesAroundAttributeAccessor:
+  Enabled: true
+
 Layout/EndAlignment:
   EnforcedStyleAlignWith: variable
 
@@ -34,8 +37,14 @@ Style/HashTransformValues:
 Style/RescueModifier:
   Enabled: false
 
+Style/SlicingWithRange:
+  Enabled: true
+
 Style/TrailingCommaInHashLiteral:
   EnforcedStyleForMultiline: consistent_comma
+
+Lint/DeprecatedOpenSSLConstant:
+  Enabled: true
 
 Lint/RaiseException:
   Enabled: true
