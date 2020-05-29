@@ -1,15 +1,17 @@
-# Paper
+# Information Security Job Scraper
+
+## Paper
 
 [View Paper](http://reitermark.us/infosec-job-scraper/paper.pdf)
 
-# Dependencies
+## Dependencies
 
 ```
 brew install geckodriver
 brew cask install firefox
 ```
 
-# Jupyter Notebook
+## Jupyter Notebook
 
 1. Activate Virtual Environment and start Jupyter Notebook:
 
