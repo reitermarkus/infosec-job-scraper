@@ -23,3 +23,13 @@ jobs:
         with:
           name: paper.pdf
           path: paper/paper.pdf
+      - name: Prepare Paper for Publishing
+        run: |
+          mkdir -p paper/gh-pages
+          mv paper/paper.pdf paper/gh-pages/
+      - name: Publish Paper
+        uses: JamesIves/github-pages-deploy-action@releases/v3
+        with:
+          BRANCH: gh-pages
+          FOLDER: paper/gh-pages
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
