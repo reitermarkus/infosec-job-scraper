@@ -21,6 +21,10 @@
 \usepackage{cleveref}
 \usepackage{nameref}
 
+\addto\extrasenglish{
+  \def\sectionautorefname{Section}
+}
+
 \usepackage[
   style   = numeric,
   sorting = none,
@@ -71,13 +75,13 @@ After choosing \textit{ScrapeStorm}, we started by setting up the crawlers. The 
 
 For each website, we would have to implement two steps. First, we need to scrape the list of search results, which provides us with a list of links to the detail pages for the job advertisements. The second step is then to scrape the detail page itself.
 
-As a first step, we tried scraping a detail page for a single job advertisement on \texttt{monster.at}. And it was a good thing we did, since it immediately highlighted a major problem. A job detail page on \texttt{monster.at} always includes the actual content of the advertisement inside of a nested \texttt{iframe} element. Using \textit{ScrapeStorm}, we were able to select that \texttt{iframe} element, but we failed to extract any data or text from it. The only thing we got was an empty string. This meant that we had to abandon the idea of using \textit{ScrapeStorm} for our purposes.
+As a first step, we tried scraping a detail page for a single job advertisement on \texttt{monster.at}. Fortunately, this immediately highlighted a major problem at the beginning of the scraping process: A job detail page on \texttt{monster.at} always includes the actual content of the advertisement inside of a nested \texttt{iframe} element. Using \textit{ScrapeStorm}, we were able to select that \texttt{iframe} element, but we failed to extract any data or text from it. The only thing we got was an empty string. This meant that we had to abandon the idea of using \textit{ScrapeStorm} for our purposes.
 
 With this setback, we now had to find another way to scrape this data. After taking a second look at the \textit{ScrapingBot} homepage, we saw that it is using headless \textit{Chrome} for its back-end. We decided to venture further into this direction and found \textit{Selenium} \cite{selenium}, which can be used to programmatically use a web browser.
 
 \textit{Selenium} supports all of the major web browsers, the only thing you need is the so called “webdriver” for the corresponding browser. Additionally, \textit{Selenium} can be used with a wide array of programming languages. For our purposes we chose to go with the Ruby version of \textit{Selenium}. Specifically, we chose to use \textit{Rake} \cite{rake}, which is similar to \textit{Make}, since it allows us to use the full functionality of \textit{Ruby} \cite{ruby} and specify tasks for each website. These scraping tasks can then be run with a simple \texttt{rake} command.
 
-Given the setback we encountered on \texttt{monster.at}, the first thing we tried with \textit{Selenium} was to implement a simple task to extract the contents of the nested \texttt{iframe} element in their detail page layout. The first thing we needed to do was to fetch a job page. Next up, we needed to locate the nested \texttt{iframe} element; luckily this element is marked by a unique \texttt{id} field called \texttt{JobPreviewSandbox}. Once we had saved the nested \texttt{iframe} into a variable, we could use the \texttt{switch\_to} function provided by \textit{Selenium} to change to it from the main frame.
+Given the setback we encountered on \texttt{monster.at}, the first thing we tried with \textit{Selenium} was to implement a simple task to extract the contents of the nested \texttt{iframe} element in their detail page layout. The first thing we needed to do was to fetch a job page. Next, we needed to locate the nested \texttt{iframe} element; luckily this element is marked by a unique \texttt{id} field called \texttt{JobPreviewSandbox}. Once we had saved the nested \texttt{iframe} into a variable, we could use the \texttt{switch\_to} function provided by \textit{Selenium} to change to it from the main frame.
 
 \begin{lstlisting}[language=Ruby]
 iframe = find_element(id: 'JobPreviewSandbox')
@@ -89,6 +93,8 @@ Seeing this proof-of-concept task working, we finally settled on using \textit{S
 \section{Implementation}
 \label{sec:implementation}
 
+In this section we first present the implementation of the scraping step for each of our chosen websites. After that we will go into more detail on how we further processed the scraped data and will also mention some specific things to look out for when extracting information from that data. Finally we will also highlight the tools we used to analyse and visualise the collected data.
+
 \subsection{Scraping}
 \label{sub:scraping}
 
@@ -99,9 +105,9 @@ As already briefly mentioned in \autoref{sec:evaluation_of_scraping_tools}, our 
 
 The first thing we needed to determine for \textit{Monster} \cite{monster} was how to perform searches. For this, we simply made a search request manually in a web browser. With the search string “information security” immediately noticed that it was escaped as \texttt{information-security} rather than the standard way to escape HTML, i.e. \texttt{information\%20security}. We needed to consider this when building the query URL.
 
-Next up, we needed to assess how search results are paginated. \textit{Monster} does not use a classic pagination method using query string parameters, but rather uses a single “infinite” list which loads new search results automatically when you scroll to the bottom, or alternatively, click the “load more jobs” button.
+Furthermore, we needed to assess how search results are paginated. \textit{Monster} does not use a classic pagination method using query string parameters, but rather uses a single “infinite” list which loads new search results automatically when you scroll to the bottom, or alternatively, click the “load more jobs” button.
 
-With \textit{Selenium}, it was quite easy to extract all URLs leading to detail pages from the result list. Loading more than the first “page” of results was, however, quite convoluted. Simply scrolling down was not a good option, since then there would be no good way of knowing when to stop scrolling. Conveniently, \textit{Selenium} provides function to scroll to a given element, so we simply tried selecting the “load more jobs” button and scrolling to it. This is where we hit another problem. We could scroll the the button, but we were not able to click on it due to a pop-up blocking exactly the lower part of the page where the button is located, which meant we first had to dismiss this pop-up, which further meant introducing another potential point of failure, but for the moment, this solution was working.
+With \textit{Selenium}, it was quite easy to extract all URLs leading to detail pages from the result list. Loading more than the first result page was, however, quite convoluted. Simply scrolling down was not a good option, since then there would be no good way of knowing when to stop scrolling. Conveniently, \textit{Selenium} provides function to scroll to a given element, so we simply tried selecting the “load more jobs” button and scrolling to it. This is where we hit another problem. We could scroll the the button, but we were not able to click on it due to a pop-up blocking exactly the lower part of the page where the button is located, which meant we first had to dismiss this pop-up, which further meant introducing another potential point of failure, but for the moment, this solution was working.
 
 In essence, the workflow for parsing URLs was as follows:
 
@@ -178,7 +184,7 @@ Once the scraping was done, we could focus on extracting information from the sc
 \subsubsection{Data Cleaning}
 \label{subsub:data_cleaning}
 
-The first step when performing any sort of natural language processing should be data cleaning. Specifically, this means removing irrelevant data and bringing the data into a format that can be processed more easily than the raw source. In our the main part that needed to be cleaned was the body text of each result. Each result contains the raw HTML source code of the body text, so the first step was to strip the text from any contained HTML tags. We used the aptly named \texttt{html2text} Python package for this purpose. After further inspection of the results, we noticed that some contained formatting, links and images in Markdown format. We quickly realised that \texttt{html2text} is in fact an HTML to Markdown converter instead of a HTML to plain text converter as we previously deemed from the name. Luckily, \texttt{html2text} provides \texttt{ignore\_emphasis}, \texttt{ignore\_links} and \texttt{ignore\_images} options which can be used to remove the Markdown output for these elements. Once we had the plain text version of the body content, we could subsequently use the \texttt{word\_tokenise} function from the NLTK to split the text into tokens to make further processing easier.
+The first step when performing any sort of natural language processing should be data cleaning. Specifically, this means removing irrelevant data and bringing the data into a format that can be processed more easily than the raw source. In our case the most important part that needed cleaning was the body text of each result. Each result contains the raw HTML source code of the body text, so the first step was to strip the text from any contained HTML tags. We used the aptly named \texttt{html2text} Python package for this purpose. After further inspection of the results, we noticed that some contained formatting, links and images in Markdown format. We quickly realised that \texttt{html2text} is in fact an HTML to Markdown converter instead of a HTML to plain text converter as we previously deemed from the name. Luckily, \texttt{html2text} provides \texttt{ignore\_emphasis}, \texttt{ignore\_links} and \texttt{ignore\_images} options which can be used to remove the Markdown output for these elements. Once we had the plain text version of the body content, we could subsequently use the \texttt{word\_tokenise} function from the NLTK to split the text into tokens to make further processing easier.
 
 \subsubsection{Extracting the Salary}
 \label{subsub:extracting_the_salary}
@@ -218,18 +224,18 @@ As seen in \autoref{salary_formats}, the diversity of number formats is quite ex
 
 The first step we took was to add another sub-step to our existing \texttt{clean\_text} step in which we used the regular expression \texttt{/(EUR|€)/} and replace it with \texttt{' \textbackslash1 '}, i.e. we add an extra space around \texttt{EUR} and \texttt{€} to cover the case where there is not already a space between the currency and the amount. We don't care about introducing extra spacing when there already is a space since the tokenisation will remove it anyways.
 
-Now that we have ensured that the currency is separated from the amount, we can add another sub-step to \texttt{clean\_word}. Here we introduce a trivial replacement and replace all words which are equal to \texttt{'€'}, \texttt{'eur'}, \texttt{'euro'} or \texttt{'euros'} with \texttt{'€'}.
+Now that we had ensured that the currency is separated from the amount, we can add another sub-step to \texttt{clean\_word}. Here we introduce a trivial replacement and replace all words which are equal to \texttt{'€'}, \texttt{'eur'}, \texttt{'euro'} or \texttt{'euros'} with \texttt{'€'}.
 
-Next, we add another sub-step to \texttt{clean\_word} which removes any trailing \texttt{',-'} from numbers. We use a regular expression here to also catch cases with more than a single hyphen. Similarly to the trailing \texttt{',-'}, we replace a trailing \texttt{'k'} with \texttt{'000'}.
+Next, we added another sub-step to \texttt{clean\_word} which removes any trailing \texttt{',-'} from numbers. We use a regular expression here to also catch cases with more than a single hyphen. Similarly to the trailing \texttt{',-'}, we replace a trailing \texttt{'k'} with \texttt{'000'}.
 
-The only thing left to do now is to normalise the decimal format (i.e. \texttt{XXXXX,XX}, \texttt{XXXXX.XX}, \texttt{XX.XXX,XX}) \texttt{XX,XXX.XX}, to \texttt{XXXXX.XX} in order to be able parse it in a later step. For the normalisation, we assume that the salary amount has at most two decimal places. We use a regular expression to match 0-2 decimal places with any delimiter symbol and group everything else together. This gives use the integer part with all delimiter symbols and the decimal part as only numbers. Now we simply remove all delimiters from the integer part and combine both parts again with a \texttt{'.'}.
+The only thing left to do now was to normalise the various decimal formats (i.e. \texttt{XXXXX,XX}, \texttt{XXXXX.XX}, \texttt{XX.XXX,XX}, \texttt{XX,XXX.XX}) to \texttt{XXXXX.XX} in order to be able parse them in a later step. For the normalisation, we assume that the salary amount has at most two decimal places. We use a regular expression to match 0-2 decimal places with any delimiter symbol and group everything else (i.e. the integer part) together. This gives use the integer part with all delimiter symbols and the decimal part as only numbers. Now we simply remove all delimiters from the integer part and combine both parts again with a \texttt{'.'}.
 
 In order to eventually extract the salary, we loop through all cleaned tokens as 2-grams so we can match the currency symbol either before or after the number.
 
 \subsubsection{Extracting the Type of Education}
 \label{subsub:extracting_the_type_of_education}
 
-Another data point we wanted to extract is the level of education required for a given job. We started by looking at some advertisements and then began building some patterns which we could use in our \texttt{guess\_education} function. Some obvious patterns include \texttt{<type>-Abschluss} and \texttt{<type>abschluss} with concrete examples being “\german{HAK-Abschluss}” and “\german{Pflichtschulabschluss}”. Since the \texttt{guess\_education} function receives the input as individual tokens, compound words including acronyms such as “\german{HTL-Abschluss}” would already be split into \texttt{'htl'} and \texttt{'abschluss'}. Given that there are only a handful of acronyms we decided for simplicity's sake to hardcode the most common ones: \texttt{'hak'}, \texttt{'hbla'}, \texttt{'htl'}, \texttt{'hlw'} and \texttt{'lfs'}. We grouped all of these into the \texttt{matura} category. Still, there were some patterns which fall into this category which were not yet recognised, such as “\german{Matura}” as a standalone term or “\german{Fachschulabschluss}”. For these, we simply check if any word contains these terms.
+Another data point we wanted to extract is the level of education required for a given job. As a reference for which types of education exist, we used the website of “The Austrian Education System”~\cite{austrian_education_system}. With this information and by subsequently looking at some advertisements we began building some patterns which we could use in our \texttt{guess\_education} function. Some obvious patterns include \texttt{<type>-Abschluss} and \texttt{<type>abschluss} with concrete examples being “\german{HAK-Abschluss}” and “\german{Pflichtschulabschluss}”. Since the \texttt{guess\_education} function receives the input as individual tokens, compound words including acronyms such as “\german{HTL-Abschluss}” would already be split into \texttt{'htl'} and \texttt{'abschluss'}. Given that there are only a handful of acronyms we decided for simplicity's sake to hardcode the most common ones: \texttt{'hak'}, \texttt{'hbla'}, \texttt{'htl'}, \texttt{'hlw'} and \texttt{'lfs'}. We grouped all of these into the \texttt{matura} category. Still, there were some patterns which fall into this category which were not yet recognised, such as “\german{Matura}” as a standalone term or “\german{Fachschulabschluss}”. For these, we simply check if any word contains these terms.
 
 The next two obvious education types were the bachelor's and master's degree. For these, we again simply checked if any word contains the respective term and categorise them accordingly. Another related education type is an \german{FH} (\german{Fachhochschule}) degree which can be equivalent to either a bachelor's or master's degree. Here we again took the same approach as for the \texttt{matura} category, since both “\german{FH-Abschluss}” and “\german{Fachhochschulabschluss}” are commonly used terms.
 
@@ -307,11 +313,11 @@ In total, we scraped 1538 job advertisements from all three websites. These are 
 
 After a review of the scraped data, we found that many advertised jobs had nothing to do with information security at all and were simply included as a consequence of the loose search algorithm provided by the job search websites. We therefore decided to add a final filter to the data depending to the job title. Once we added this filter we were left with 121 information security jobs out of 1538 total scraped jobs. All graphs presented in this section are based on this number.
 
-Let us begin with the employment type. For the employment type we used two different distinctions: full-time vs. part-time positions and permanent vs. temporary positions.
+In order to classify the employment type, we used two different distinctions: full-time vs. part-time positions and permanent vs. temporary positions.
 
 In \autoref{fig:employment_type_chart} we can see that 95\% of cybersecurity jobs are listed as full-time positions and the remaining 5\% do not specify this information at all. The permanence of the position is even less common with only 3.3\% of permanent positions and the remaining 96.7\% leaving this information unspecified. In general, the assumption for leaving this information unspecified is a permanent full-time position, which means that at this point virtually all open cybersecurity positions are permanent full-time positions.
 
-Next up we will take a look at the required level of education for information security jobs. As shown in \autoref{fig:education_chart}, the majority of positions -- around 59\% -- require a bachelor's degree while only around 9\% require a master's degree.
+Next we will take a look at the required level of education for information security jobs. As shown in \autoref{fig:education_chart}, the majority of positions -- around 59\% -- require a bachelor's degree while only around 9\% require a master's degree.
 
 \begin{figure}[H]
 	\centering
