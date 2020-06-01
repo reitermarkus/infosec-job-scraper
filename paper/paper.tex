@@ -47,7 +47,7 @@
 
 \begin{abstract}
 
-In this paper we present a survey conducted by scraping and analysing various job search websites in order to get an overview of the current situation and trends regarding the information security job landscape in Austria.
+In this paper we present a survey conducted by scraping and analysing various job search websites in order to get an overview of the current situation and trends regarding the information security job landscape in Austria. This was done mainly in order to get an understanding of whether the skills that are currently taught in schools and universities are sufficient to satisfy the requirements expected by recruiters or whether there exists a gap between the curriculum and professional practice. For this, we evaluated data points ranging from average salary and location to required certifications.
 
 \keywords{Information Security \and Scraping \and Job Advertisements}
 
@@ -58,7 +58,16 @@ In this paper we present a survey conducted by scraping and analysing various jo
 \section{Introduction}
 \label{sec:introduction}
 
-Information security management is more and more becoming an essential area of expertise for large and small companies alike. In order to get a better understanding of what the information security job landscape looks like in Austria, we conducted a survey of three job search websites popular in Austria: \textit{Monster}~\cite{monster}, \textit{Indeed}~\cite{indeed} and \textit{StepStone}~\cite{stepstone}. Our survey is comprised of three main steps: Firstly, we needed to scrape data each of the three job search websites. As will be explained in more detail in \autoref{sec:evaluation_of_scraping_tools}, we evaluated various scraping tools before we advanced to the actual implementation of the scraping process which will be explained in \autoref{sec:implementation}. The second part of our survey was then to use natural language processing in order to generate a more or less structured version of the information contained in the mostly unstructured text of the job advertisements. Lastly, we analysed and visualised the output data from the natural language processing step in order to fulfil our objective of forming a good overall perspective of the cybersecurity job landscape in Austria. In \autoref{sec:findings} we will present the findings we made during this process.
+Information security management is more and more becoming an essential area of expertise for large and small companies alike. For that reason, it is crucial to know the requirements needed for working in this field. Both companies as well as prospective employees need to have the same understanding of the skills needed for open positions. Moreover, schools and universities also need to have that same understanding in order to properly teach the necessary information security skills.
+
+\begin{figure}[H]
+	\centering
+  \includegraphics[width=\textwidth]{project-workflow.dot.pdf}
+	\caption{Overview of the Project Workflow}
+	\label{fig:project_workflow}
+\end{figure}
+
+In order to get a better understanding of what the information security job landscape looks like in Austria, we conducted a survey of three job search websites popular in Austria: \textit{Monster}~\cite{monster}, \textit{Indeed}~\cite{indeed} and \textit{StepStone}~\cite{stepstone}. Our survey is comprised of three main steps: Firstly, we needed to scrape data each of the three job search websites. As will be explained in more detail in \autoref{sec:evaluation_of_scraping_tools}, we evaluated various scraping tools before we advanced to the actual implementation of the scraping process which will be explained in \autoref{sec:implementation}. The second part of our survey was then to use natural language processing in order to generate a more or less structured version of the information contained in the mostly unstructured text of the job advertisements. Lastly, we analysed and visualised the output data from the natural language processing step in order to fulfil our objective of forming a good overall perspective of the cybersecurity job landscape in Austria. In \autoref{sec:findings} we will present the findings we made during this process.
 
 \section{Evaluation of Scraping Tools}
 \label{sec:evaluation_of_scraping_tools}
@@ -315,7 +324,7 @@ After a review of the scraped data, we found that many advertised jobs had nothi
 
 In order to classify the employment type, we used two different distinctions: full-time vs. part-time positions and permanent vs. temporary positions.
 
-In \autoref{fig:employment_type_chart} we can see that 95\% of cybersecurity jobs are listed as full-time positions and the remaining 5\% do not specify this information at all. The permanence of the position is even less common with only 3.3\% of permanent positions and the remaining 96.7\% leaving this information unspecified. In general, the assumption for leaving this information unspecified is a permanent full-time position, which means that at this point virtually all open cybersecurity positions are permanent full-time positions.
+In \autoref{fig:employment_type_chart} we can see that 95\% of cybersecurity jobs are listed as full-time positions and the remaining 5\% do not specify this information at all. The permanence of the position is even less common with only 3.3\% of permanent positions and the remaining 96.7\% leaving this information unspecified. From manually reviewing some of the advertisements without this information, it seems that in general, the assumption when leaving this information unspecified is a permanent full-time position, which means that at this point virtually all open cybersecurity positions are permanent full-time positions.
 
 Next we will take a look at the required level of education for information security jobs. As shown in \autoref{fig:education_chart}, the majority of positions -- around 59\% -- require a bachelor's degree while only around 9\% require a master's degree.
 
@@ -326,7 +335,7 @@ Next we will take a look at the required level of education for information secu
 	\label{fig:education_chart}
 \end{figure}
 
-The second most common requirement is an apprenticeship (“\german{Ausbildung}”) at around 36\%, followed by the “\german{Matura}” with 22\%. After a manual review of the 4\% belonging to apprenticeship (“\german{Lehre}”), these seem to be mostly false positives, at least in our case when only taking information security jobs into account. The false positives in this case are due to the fact the the term “\german{Lehre}” is not only used to describe an apprenticeship but also teaching -- also referred to as “\german{Lehre}” -- positions.
+The second most common requirement is an apprenticeship (“\german{Ausbildung}”) at around 36\%, followed by the “\german{Matura}” with 22\%. After a manual review of the 4\% belonging to apprenticeship (“\german{Lehre}”), these seem to be mostly false positives, at least in our case when only taking information security jobs into account. The false positives in this case are due to the fact the the term “\german{Lehre}” is not only used to describe an apprenticeship but also teaching -- also referred to as “\german{Lehre}” -- positions. The same is true for “\german{Ausbilding}”, as a lot of advertisements mention “\german{technische Ausbildung}” when referring to the term “technical education” which can mean the “\german{Matura}” as well as a bachelor's degree, both of which are not equivalent to an apprenticeship. When looking at the results, it is not surprising to see that a bachelor's degree seems to be the minimum requirement for information security jobs since a lot of the required skills are only taught during the course of a university degree.
 
 \begin{figure}[H]
 	\centering
@@ -350,6 +359,8 @@ To further analyse this, we used the population data included in the Austria Cit
 
 Let us now look at the average salary. According to our collected data, the total average salary for information security jobs in Austria is 3715.66 € per month. When looking at the numbers per state, we can see the average salary ranging from 3079 € in Tirol to 4160 € in Salzburg. Given this range we already see a surprisingly huge difference of 1081 € between two the neighbouring states Tirol and Salzburg. The average salary in Vienna is closest to the country's total average with only a 1\% deviation. For Lower Austria as well as Burgenland and Vorarlberg we could not extract any salary data.
 
+In our opinion the strong bias towards Vienna is due to the fact that a lot of domestic as well as international companies have their headquarters located in Vienna for the simple reason that it is the capital.
+
 \begin{figure}[H]
 	\centering
   \includegraphics[width=\textwidth]{average-salary-bar-chart.pdf}
@@ -357,7 +368,7 @@ Let us now look at the average salary. According to our collected data, the tota
 	\label{fig:salary_chart}
 \end{figure}
 
-Lastly we will analyse the certifications we extracted. Among the most popularly required certifications are CISM, CISA, ITIL, CISSP and ISO/IEC~27001 (refer to \autoref{tab:certifications} for the certifications' descriptions) with all being specified in at least 20\% of advertisements. With 26\% of jobs advertisements mentioning ISO/IEC~27001, it is by far the most requested requirement. In total, 62 out of 121 job advertisements -- 51 \% --, specify at least one certification as a requirement.
+Lastly we will analyse the certifications we extracted. Among the most popularly required certifications are CISM, CISA, ITIL, CISSP and ISO/IEC~27001 (refer to \autoref{tab:certifications} for the certifications' descriptions) with all being specified in at least 20\% of advertisements. With 26\% of jobs advertisements mentioning ISO/IEC~27001, it is by far the most requested requirement. ISO/IEC~27001 is a well-known international standard for information security, so it makes sense that is one of the most important requirements for information security jobs. In total, 62 out of 121 job advertisements -- 51 \% --, specify at least one certification as a requirement, we had expected this number to be significantly above 50\%.
 
 \begin{figure}[H]
 	\centering

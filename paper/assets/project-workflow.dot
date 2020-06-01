@@ -1,0 +1,20 @@
+digraph G {
+  graph [fontname="sans-serif"];
+  node [fontname="sans-serif"];
+  edge [fontname="sans-serif"];
+
+  scrape_monster -> clean_data;
+  scrape_indeed -> clean_data;
+  scrape_stepstone -> clean_data;
+  clean_data -> extract_information;
+  extract_information -> analyse_data;
+  analyse_data -> visualise_results;
+
+  scrape_monster [label="Gather data from Monster.", pos="0,0!"];
+  scrape_indeed [label="Gather data from Indeed.", pos="0,1!"];
+  scrape_stepstone [label="Gather data from StepStone.", pos="0,2!"];
+  clean_data [label="Clean collected data.", pos="1,0!"];
+  extract_information [label="Extract information from cleaned data.", pos="1,1!"];
+  analyse_data [label="Analyse extracted information.", pos="2,0!"];
+  visualise_results [label="Visualise the analysis results.", pos="2,1!"]
+}

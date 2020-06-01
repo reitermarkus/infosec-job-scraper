@@ -1,0 +1,18 @@
+digraph monster {
+  graph [fontname="sans-serif"];
+  node [fontname="sans-serif"];
+  edge [fontname="sans-serif"];
+
+  node [style=filled, color="#642891", fontcolor=white];
+  edge [color="#642891", fontcolor="#642891"];
+
+  monster_search_request -> monster_load_more_jobs;
+  monster_load_more_jobs -> monster_collect_urls [label="if button does not exist"];
+  monster_load_more_jobs -> monster_click_more_jobs [label="if button exists"];
+  monster_click_more_jobs -> monster_load_more_jobs;
+
+  monster_search_request [label="Perform search request."];
+  monster_load_more_jobs [label="Locate “Load more jobs” button."];
+  monster_click_more_jobs [label="Click “Load more jobs” button."];
+  monster_collect_urls [label="Select all result URLs and collect them into a result array."];
+}

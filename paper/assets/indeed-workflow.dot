@@ -1,0 +1,22 @@
+digraph indeed {
+  graph [fontname="sans-serif"];
+  node [fontname="sans-serif"];
+  edge [fontname="sans-serif"];
+
+  node [style=filled, color="#2164f3", fontcolor=white];
+  edge [color="#2164f3", fontcolor="#2164f3"];
+
+  indeed_initialize_array -> indeed_search_request;
+  indeed_search_request -> indeed_select_results;
+  indeed_select_results -> indeed_check_next_button;
+  indeed_check_next_button -> indeed_return_array [label="if button does not exist"];
+  indeed_check_next_button -> indeed_increase_offset [label="if button exists"];
+  indeed_increase_offset -> indeed_search_request;
+
+  indeed_initialize_array [label="Initialize result array and result offset."];
+  indeed_search_request [label="Perform search request with offset."];
+  indeed_select_results [label="Select all result URLs and add them to the result array."];
+  indeed_check_next_button [label="Check if “next page” button exists."];
+  indeed_increase_offset [label="Increase result offset by 10."];
+  indeed_return_array [label="Return array."]
+}

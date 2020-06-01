@@ -1,0 +1,24 @@
+digraph indeed {
+  graph [fontname="sans-serif"];
+  node [fontname="sans-serif"];
+  edge [fontname="sans-serif"];
+
+  node [style=filled, color="#0c2577", fontcolor=white];
+  edge [color="#0c2577", fontcolor="#0c2577"];
+
+  stepstone_initialize_array -> stepstone_search_request;
+  stepstone_search_request -> stepstone_select_pages;
+  stepstone_select_pages -> stepstone_select_results;
+  stepstone_select_results -> stepstone_check_page;
+  stepstone_check_page -> stepstone_return_array [label="if on last page"];
+  stepstone_check_page -> stepstone_increase_offset [label="if there are more pages"];
+  stepstone_increase_offset -> stepstone_search_request_i;
+
+  stepstone_initialize_array [label="Initialize result array, current page and page array."];
+  stepstone_search_request [label="Perform search request with current page."];
+  stepstone_select_pages [label="Select all pages and add them to the page array."]
+  stepstone_select_results [label="Select all result URLs and add them to the result array."];
+  stepstone_check_page [label="Check if current page is last page."];
+  stepstone_increase_offset [label="Go to next page."];
+  stepstone_return_array [label="Return array."]
+}
