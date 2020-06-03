@@ -166,6 +166,6 @@ task graphs: :python_venv do
 end
 
 task :tex do
-  cd 'paper'
+  cd 'tex'
   sh 'latexmk', '-cd'
 end

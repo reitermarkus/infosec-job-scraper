@@ -14,22 +14,17 @@ jobs:
       - name: Check Spelling
         uses: reitermarkus/aspell@master
         with:
-          files: paper/paper.tex
-          args: --lang en_GB --mode tex --personal ./paper/aspell.en_GB.pws --add-tex-command PassOptionsToPackage\ pp --add-tex-command texttt\ op --add-tex-command cite\ op --add-tex-command german\ p
+          files: tex/*.tex
+          args: --lang en_GB --mode tex --personal ./tex/aspell.en_GB.pws --add-tex-command PassOptionsToPackage\ pp --add-tex-command texttt\ op --add-tex-command cite\ op --add-tex-command german\ p
       - name: Compile Paper
         uses: reitermarkus/latexmk@master
-      - name: Upload Paper
-        uses: actions/upload-artifact@v2
-        with:
-          name: paper.pdf
-          path: paper/paper.pdf
       - name: Prepare Paper for Publishing
         run: |
-          mkdir -p paper/gh-pages
-          mv paper/paper.pdf paper/gh-pages/
+          mkdir -p tex/gh-pages
+          mv tex/*.pdf tex/gh-pages/
       - name: Publish Paper
         uses: JamesIves/github-pages-deploy-action@releases/v3
         with:
           BRANCH: gh-pages
-          FOLDER: paper/gh-pages
+          FOLDER: tex/gh-pages
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
