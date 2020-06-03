@@ -3,6 +3,7 @@
 ## Paper & Presentation
 
 [View Paper](http://reitermark.us/infosec-job-scraper/paper.pdf)
+
 [View Presentation](http://reitermark.us/infosec-job-scraper/presentation.pdf)
 
 ## Dependencies
