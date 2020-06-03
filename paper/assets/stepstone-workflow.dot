@@ -12,7 +12,7 @@ digraph indeed {
   stepstone_select_results -> stepstone_check_page;
   stepstone_check_page -> stepstone_return_array [label="if on last page"];
   stepstone_check_page -> stepstone_increase_offset [label="if there are more pages"];
-  stepstone_increase_offset -> stepstone_search_request_i;
+  stepstone_increase_offset -> stepstone_search_request;
 
   stepstone_initialize_array [label="Initialize result array, current page and page array."];
   stepstone_search_request [label="Perform search request with current page."];

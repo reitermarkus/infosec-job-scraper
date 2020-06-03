@@ -2,19 +2,11 @@
 
 \linespread{1.1}
 
-\usepackage{lmodern}
-\usepackage[english]{babel}
-
-\usepackage{fontspec}
-
 \raggedbottom
 
-\usepackage{multicol}
-
 \usepackage{float}
-\usepackage{graphicx}
-\graphicspath{{assets/}}
-\usepackage{listings}
+
+\input{common.tex}
 
 \PassOptionsToPackage{hyphens}{url}
 \usepackage{hyperref}
@@ -31,13 +23,7 @@
 ]{biblatex}
 \bibliography{paper}
 
-\newcommand{\german}[1]{{#1}}
-
 \begin{document}
-
-\title{Analysis of the \texorpdfstring{\\}{} Information Security Job Landscape \texorpdfstring{\\}{} in Austria}
-
-\author{Markus Reiter}
 
 \institute{University of Innsbruck, Austria}
 
@@ -67,7 +53,9 @@ Information security management is more and more becoming an essential area of e
 	\label{fig:project_workflow}
 \end{figure}
 
-In order to get a better understanding of what the information security job landscape looks like in Austria, we conducted a survey of three job search websites popular in Austria: \textit{Monster}~\cite{monster}, \textit{Indeed}~\cite{indeed} and \textit{StepStone}~\cite{stepstone}. Our survey is comprised of three main steps: Firstly, we needed to scrape data each of the three job search websites. As will be explained in more detail in \autoref{sec:evaluation_of_scraping_tools}, we evaluated various scraping tools before we advanced to the actual implementation of the scraping process which will be explained in \autoref{sec:implementation}. The second part of our survey was then to use natural language processing in order to generate a more or less structured version of the information contained in the mostly unstructured text of the job advertisements. Lastly, we analysed and visualised the output data from the natural language processing step in order to fulfil our objective of forming a good overall perspective of the cybersecurity job landscape in Austria. In \autoref{sec:findings} we will present the findings we made during this process.
+In order to get a better understanding of what the information security job landscape looks like in Austria, we conducted a survey of three job search websites popular in Austria: \textit{Monster}~\cite{monster}, \textit{Indeed}~\cite{indeed} and \textit{StepStone}~\cite{stepstone}. We chose these three websites since they are not only popular in Austria but are used by companies in other countries as well. Therefore they receive a lot of attention from companies and people looking for a job.
+
+Our survey is comprised of three main steps: Firstly, we needed to scrape data each of the three job search websites. As will be explained in more detail in \autoref{sec:evaluation_of_scraping_tools}, we evaluated various scraping tools before we advanced to the actual implementation of the scraping process which will be explained in \autoref{sec:implementation}. The second part of our survey was then to use natural language processing in order to generate a more or less structured version of the information contained in the mostly unstructured text of the job advertisements. Lastly, we analysed and visualised the output data from the natural language processing step in order to fulfil our objective of forming a good overall perspective of the cybersecurity job landscape in Austria. In \autoref{sec:findings} we will present the findings we made during this process.
 
 \section{Evaluation of Scraping Tools}
 \label{sec:evaluation_of_scraping_tools}
@@ -225,6 +213,7 @@ The first data point we decided to extract was the salary for the advertised job
       \item 60000 €
     \end{description}
   \end{multicols}
+
   \caption{An incomplete list (extracted from actual data) of number formats used to represent salary.}
   \label{salary_formats}
 \end{figure}

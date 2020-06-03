@@ -12,3 +12,6 @@
 *.blg
 *.run.xml
 *.xdv
+*.nav
+*.snm
+*.toc
