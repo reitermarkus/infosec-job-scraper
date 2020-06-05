@@ -1,6 +1,6 @@
 digraph G {
   graph [fontname="sans-serif"];
-  node [fontname="sans-serif"];
+  node [fontname="sans-serif", shape=Mrecord];
   edge [fontname="sans-serif"];
 
   scrape_monster -> clean_data;

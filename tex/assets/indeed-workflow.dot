@@ -1,6 +1,6 @@
 digraph indeed {
   graph [fontname="sans-serif"];
-  node [fontname="sans-serif"];
+  node [fontname="sans-serif", shape=Mrecord];
   edge [fontname="sans-serif"];
 
   node [style=filled, color="#2164f3", fontcolor=white];
