@@ -3,8 +3,6 @@
 *.aux
 *.fls
 *.log
-*.pdf
-!assets/*.pdf
 *.synctex.gz
 *.fdb_latexmk
 *.bbl
